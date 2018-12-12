@@ -1,0 +1,6 @@
+pickle/
+plots/
+other/
+
+.ipynb_checkpoints/
+.ropeproject/
