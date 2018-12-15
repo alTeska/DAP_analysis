@@ -2,18 +2,22 @@ import argparse, os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-from DAPmodel import DAPSummaryStats, DAPSummaryStatsNoAP
-from DAPmodel import DAPSimulator
+from DAPmodel.DAPsumstats import DAPSummaryStats
+from DAPmodel.DAPSumStatsNoAP import DAPSummaryStatsNoAP
+from DAPmodel.DAPSumStats import DAPSummaryStatsA
 
-from DAPmodel import obs_params, syn_obs_data, prior, syn_obs_stats
-from DAPmodel.utils_analysis import plot_distr, plot_distr_multiple, simulate_data_distr
+DAPSummaryStats
+from DAPmodel.DAPsimulator import DAPSimulator
+
+from DAPmodel.utils import obs_params, syn_obs_data, prior, syn_obs_stats
+from utils_analysis import plot_distr, plot_distr_multiple, simulate_data_distr
 
 from delfi.inference import SNPE
 from delfi.generator import Default
 from delfi.utils.io import save, save_pkl
 
-from cell_fitting.read_heka import get_sweep_index_for_amp, get_i_inj_from_function
-from cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
+from DAPmodel.cell_fitting.read_heka import get_sweep_index_for_amp, get_i_inj_from_function
+from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
 
 parser = argparse.ArgumentParser()

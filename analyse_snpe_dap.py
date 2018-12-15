@@ -1,7 +1,7 @@
 # Script for Cluster data analysis of GLM -  plots of weights and biases
 import os
 import argparse
-from DAPmodel.utils_analysis import logs_to_plot
+from utils_analysis import logs_to_plot
 from delfi.utils.io import load_pkl
 # from tqdm import tqdm   #TODO
 

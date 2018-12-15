@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 # from tqdm import tqdm  #TODO
 from scipy.stats import ttest_ind, wilcoxon
 
-from DAPmodel.utils_analysis import sample_distributions, plot_distribution
-from DAPmodel.utils_analysis import plot_distributions_cross, plot_mean_std
-from lfimodels.hodgkinhuxley import utils
+from utils_analysis import sample_distributions, plot_distribution
+from utils_analysis import plot_distributions_cross, plot_mean_std
+# from lfimodels.hodgkinhuxley import utils
 
 from DAPmodel import obs_params, syn_current, syn_obs_data, prior, syn_obs_stats
 
