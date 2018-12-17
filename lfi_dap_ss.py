@@ -1,20 +1,19 @@
 import argparse, os, sys
 import numpy as np
 import matplotlib.pyplot as plt
+from delfi.inference import SNPE
+from delfi.generator import Default
+from delfi.utils.io import save, save_pkl
 
 from DAPmodel.DAPsumstats import DAPSummaryStats
 from DAPmodel.DAPSumStatsNoAP import DAPSummaryStatsNoAP
-from DAPmodel.DAPSumStats import DAPSummaryStatsA
+# from DAPmodel.DAPSumStats import DAPSummaryStatsA
 
-DAPSummaryStats
 from DAPmodel.DAPsimulator import DAPSimulator
 
 from DAPmodel.utils import obs_params, syn_obs_data, prior, syn_obs_stats
 from utils_analysis import plot_distr, plot_distr_multiple, simulate_data_distr
 
-from delfi.inference import SNPE
-from delfi.generator import Default
-from delfi.utils.io import save, save_pkl
 
 from DAPmodel.cell_fitting.read_heka import get_sweep_index_for_amp, get_i_inj_from_function
 from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
@@ -79,7 +78,7 @@ observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
 # setting up parameters
 params, labels = obs_params()
 
-params = np.array([13, 0.3])
+params = np.array([0.1, 15])
 prior = prior(params, prior_log=False, prior_uniform=False)
 
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
