@@ -23,11 +23,16 @@ def plot_distr_multiple(means, variances, labels):
     '''Plots distributions based on arrays of means and variances'''
     fig, ax = plt.subplots(1, 1, figsize=(8,8))
 
-    for u, var, l in zip(means, variances, labels):
+    for i in np.arange(0, len(labels)):
+        var = variances[i]
+        u = means[i]
+        l = labels[i]
+    # for u, var, l in zip(means, variances, labels):
+        print(u, var, l, '\n')
         sigma = math.sqrt(var)
         x = np.linspace(u - 3*sigma, u + 3*sigma, 100)
 
-        ax.plot(x,mlab.normpdf(x, u, sigma), label=l)
+        ax.plot(x, mlab.normpdf(x, u, sigma), label=l)
 
     ax.grid()
     ax.legend()

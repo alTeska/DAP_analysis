@@ -7,7 +7,7 @@ from delfi.utils.io import save, save_pkl
 
 from DAPmodel.DAPsumstats import DAPSummaryStats
 from DAPmodel.DAPSumStatsNoAP import DAPSummaryStatsNoAP
-# from DAPmodel.DAPSumStats import DAPSummaryStatsA
+from DAPmodel.DAPSumStats import DAPSummaryStatsA
 
 from DAPmodel.DAPsimulator import DAPSimulator
 
@@ -82,7 +82,9 @@ params = np.array([0.1, 15])
 prior = prior(params, prior_log=False, prior_uniform=False)
 
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=2, summary_stats=4, data=x_o)
+                  n_summary=2, summary_stats=2
+                  , data=x_o)
+
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
 
@@ -93,7 +95,7 @@ G = Default(model=M, prior=prior, summary=sum_stats)  # Generator
 
 # Runing the simulation
 inf_snpe = SNPE(generator=G, n_components=1, n_hiddens=[2], obs=S,
-                pilot_samples=10, prior_mixin=50)
+                pilot_samples=10)
 
 logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
                                      monitor=observables, round_cl=1)
