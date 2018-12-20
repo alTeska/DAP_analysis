@@ -5,13 +5,13 @@ n_comp=$3
 # Run and analyse HH SNPE
 # ss1
 echo -e '\n1. hh_snpe ss1'
-python hh_SNPE.py -s 1 --name _ss1 --n_samples $n_samples --n_rounds $n_rounds --n_components $n_comp
+python lfi_dap_ss.py -s 1 --name _ss1 --n_samples $n_samples --n_rounds $n_rounds --n_components $n_comp
 
 echo -e '\n2. analyse_snpe'
-python analyse_snpe_hh.py --name _ss1
+python analyse_snpe_dap.py --name _ss1
 
 echo -e '\n3. analyse_distr_snpe'
-python analyse_distr_snpe_hh.py --name _ss1 --ii_samples 1000
+python analyse_distr_snpe_dap.py --name _ss1 --ii_samples 1000
 
 # ss2
 echo -e '\n1. hh_snpe ss2'

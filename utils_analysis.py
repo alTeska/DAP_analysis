@@ -23,11 +23,11 @@ def plot_distr_multiple(means, variances, labels):
     '''Plots distributions based on arrays of means and variances'''
     fig, ax = plt.subplots(1, 1, figsize=(8,8))
 
-    for i in np.arange(0, len(labels)):
-        var = variances[i]
-        u = means[i]
-        l = labels[i]
-    # for u, var, l in zip(means, variances, labels):
+    # for i in np.arange(0, len(labels)):
+    #     var = variances[i]
+    #     u = means[i]
+    #     l = labels[i]
+    for u, var, l in zip(means, variances, labels):
         print(u, var, l, '\n')
         sigma = math.sqrt(var)
         x = np.linspace(u - 3*sigma, u + 3*sigma, 100)
@@ -246,12 +246,14 @@ def generate_dataframe(logs, key, melted=False):
 def dataframe_to_plot(df, key, melted=False):
     """Generates plot from data frame with chosen key"""
     if melted:
-        g = sns.FacetGrid(df, height=6, aspect=2., hue='variable')
+        # g = sns.FacetGrid(df, height=6, aspect=2., hue='variable')
+        g = sns.FacetGrid(df, hue='variable')
         g.map(plt.plot, 'value')
         plt.legend()
 
     else:
-        g = sns.FacetGrid(df, height=6, aspect=2.)
+        # g = sns.FacetGrid(df, height=6, aspect=2.)
+        g = sns.FacetGrid(df)
         g.map(plt.plot, key)
 
     plt.title(key)
