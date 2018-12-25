@@ -99,6 +99,13 @@ def sample_distributions(prior, posterior, M, S, ii=1000):
 
     return prior_sampl, posterior_sampl
 
+def sample_distribution(dist,  M, S, ii=1000):
+    """Returns samples from prior and posterior distributions"""
+    distr_sample = simulate_data_distr(prior, M, S, n_samples=ii)
+    distr_sample = split_list(prior_sampl)
+
+    return distr_sample
+
 
 def plot_distribution(distr, labels):
     """Returns a plot of prior and posterior distributions of the parameters (sampled)"""
@@ -246,13 +253,13 @@ def generate_dataframe(logs, key, melted=False):
 def dataframe_to_plot(df, key, melted=False):
     """Generates plot from data frame with chosen key"""
     if melted:
-        # g = sns.FacetGrid(df, height=6, aspect=2., hue='variable')
-        g = sns.FacetGrid(df, hue='variable')
+        g = sns.FacetGrid(df, height=6, aspect=2., hue='variable')
+        # g = sns.FacetGrid(df, hue='variable')
         g.map(plt.plot, 'value')
         plt.legend()
 
     else:
-        # g = sns.FacetGrid(df, height=6, aspect=2.)
+        g = sns.FacetGrid(df, height=6, aspect=2.)
         g = sns.FacetGrid(df)
         g.map(plt.plot, key)
 

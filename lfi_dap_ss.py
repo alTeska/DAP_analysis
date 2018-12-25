@@ -4,31 +4,31 @@ import matplotlib.pyplot as plt
 from delfi.distribution import Uniform
 from delfi.inference import SNPE
 from delfi.generator import Default
-from delfi.utils.io import save, save_pkl
+from delfi.utils.io import save_pkl
 
 from DAPmodel.DAPsumstats import DAPSummaryStats
 from DAPmodel.DAPSumStatsNoAP import DAPSummaryStatsNoAP
 from DAPmodel.DAPSumStats import DAPSummaryStatsA
-
 from DAPmodel.DAPsimulator import DAPSimulator
-
 from DAPmodel.utils import obs_params, syn_obs_data, prior, syn_obs_stats
-from utils_analysis import plot_distr, plot_distr_multiple, simulate_data_distr
-
-
-from DAPmodel.cell_fitting.read_heka import get_sweep_index_for_amp, get_i_inj_from_function
+from DAPmodel.cell_fitting.read_heka import (get_sweep_index_for_amp,
+                                             get_i_inj_from_function)
 from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
+from utils_analysis import plot_distr_multiple, simulate_data_distr
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--name", help="file name")
 parser.add_argument("-ns", "--n_samples",
                     help="number of samples per round")
+parser.add_argument("-nr", "--n_rounds",
+                    help="number of rounds")
 
 args = parser.parse_args()
 
 if args.name  is None: args.name = ''
 if args.n_samples is None: args.n_samples = '10'
+if args.n_rounds is None: args.n_rounds = '1'
 
 directory = 'pickle/dap_model' + args.name
 direct_out = 'plots/dap_models' + args.name + '/'
@@ -42,7 +42,7 @@ if not os.path.exists(direct_out):
     os.makedirs(direct_out)
 
 n_samples = int(args.n_samples)
-n_rounds = 2
+n_rounds = int(args.n_rounds)
 dt = 0.01
 
 summary_stats_type = 1
