@@ -1,9 +1,9 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils_analysis import plot_distr_multiple, simulate_data_distr
-
-from delfi.distribution import Uniform, Gaussian
+from utils_analysis import simulate_data_distr, logs_to_plot
+from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE
 
@@ -17,7 +17,9 @@ from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 # General Settings Pick
 n_rounds = 1
 n_summary = 7
-n_samples = 1000
+n_samples = 4000
+name = '_ss999_4k'
+direct_out = 'plots/dap_models' + name + '/'
 
 # Setup Priors
 prior_min = np.array([0, 1])
@@ -41,6 +43,12 @@ dt = t[1] - t[0]
 i_inj, t_on, t_off = get_i_inj_from_function(protocol, [sweep_idx], t[-1], t[1]-t[0],
                                              return_discontinuities=False)
 
+# picking experiments observables
+observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
+               'h2.mb', 'weights.mW', 'weights.mb', 'means.mW0', 'means.mW1',
+               'means.mb0', 'means.mb1', 'precisions.mW0', 'precisions.mW1',
+               'precisions.mb0', 'precisions.mb1'}
+
 # generate data format for SNPE / OBSERVABLE
 x_o =  {'data': v,
         'time': t,
@@ -62,7 +70,8 @@ G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 inf_snpe = SNPE(generator=G, n_components=1, n_hiddens=[2], obs=S,
                 pilot_samples=10, prior_norm=True)
 
-logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds, proposal=prior_unif)
+logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
+                                     proposal=prior_unif, monitor=observables)
 
 # Analyse results
 samples_prior = prior_unif.gen(n_samples=int(5e5))
@@ -95,7 +104,7 @@ axes[1, 0].set_title('prior')
 axes[0, 1].set_title('posterior')
 axes[1, 1].set_title('posterior')
 
-distr, axes = plt.subplots(2, 1, figsize=(16, 14))
+distr_comb, axes = plt.subplots(2, 1, figsize=(16, 14))
 axes[0].hist(samples_prior[:, 0], bins='auto', label='prior')
 axes[1].hist(samples_prior[:, 1], bins='auto', label='prior')
 axes[0].hist(samples_posterior[:, 0], bins='auto', label='posterior')
@@ -107,3 +116,35 @@ axes[0].set_title('both')
 axes[1].set_title('both')
 
 plt.show()
+
+# Create Weights Plots
+print('Generating Plots')
+
+if not os.path.exists(direct_out):
+    print('creating output directory')
+    os.makedirs(direct_out)
+
+g_loss = logs_to_plot(logs, 'loss')
+g_meansW0 = logs_to_plot(logs, 'means.mW0', melted=True)
+g_precisionsW0 = logs_to_plot(logs, 'precisions.mW0', melted=True)
+g_h1W = logs_to_plot(logs, 'h1.mW', melted=True)
+
+# Create Biases Plots
+g_meansb0 = logs_to_plot(logs, 'means.mb0', melted=True)
+g_precisionsb0 = logs_to_plot(logs, 'precisions.mb0', melted=True)
+g_h1b = logs_to_plot(logs, 'h1.mb', melted=True)
+
+# Saving plots
+print('Saving Plots')
+simulation.savefig(direct_out + 'simulation.png', bbox_inches='tight')
+distr.savefig(direct_out + 'distr.png', bbox_inches='tight')
+distr_comb.savefig(direct_out + 'distr_comb.png', bbox_inches='tight')
+
+g_loss.savefig(direct_out + 'loss.png', bbox_inches='tight')
+g_meansW0.savefig(direct_out + 'meansW0.png', bbox_inches='tight')
+g_precisionsW0.savefig(direct_out + 'precisionsW0.png', bbox_inches='tight')
+g_h1W.savefig(direct_out + 'h1W.png', bbox_inches='tight')
+
+g_meansb0.savefig(direct_out + 'meansb0.png', bbox_inches='tight')
+g_precisionsb0.savefig(direct_out + 'precisionsb0.png', bbox_inches='tight')
+g_h1b.savefig(direct_out + 'h1b.png', bbox_inches='tight')
