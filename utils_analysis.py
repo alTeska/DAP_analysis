@@ -260,7 +260,6 @@ def dataframe_to_plot(df, key, melted=False):
 
     else:
         g = sns.FacetGrid(df, height=6, aspect=2.)
-        g = sns.FacetGrid(df)
         g.map(plt.plot, key)
 
     plt.title(key)

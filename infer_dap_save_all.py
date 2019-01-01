@@ -1,11 +1,13 @@
-import os
+import argparse, os, sys
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
-from utils_analysis import simulate_data_distr, logs_to_plot
+from utils_analysis import logs_to_plot
 from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE
+from delfi.utils.io import save_pkl
 
 from DAPmodel.utils import prior, obs_params, syn_obs_stats, syn_obs_data
 from DAPmodel.DAPSumStats import DAPSummaryStatsA
@@ -14,16 +16,38 @@ from DAPmodel.cell_fitting.read_heka import (get_sweep_index_for_amp,
                                              get_i_inj_from_function)
 from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
+
 # General Settings Pick
-n_rounds = 3
-n_summary = 7
-n_samples = 4000
+parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--name", help="file name")
+parser.add_argument("-ns", "--n_samples",
+                    help="number of samples per round")
+parser.add_argument("-nr", "--n_rounds",
+                    help="number of rounds")
+
+args = parser.parse_args()
+
+if args.name  is None: args.name = ''
+if args.n_samples is None: args.n_samples = '10'
+if args.n_rounds is None: args.n_rounds = '1'
+
+directory = 'pickle/dap_model' + args.name
+direct_out = 'plots/dap_models' + args.name + '/'
+
+if not os.path.exists(directory):
+    print('creating directory')
+    os.makedirs(directory)
+
+if not os.path.exists(direct_out):
+    print('creating output directory')
+    os.makedirs(direct_out)
+
+n_samples = int(args.n_samples)
+n_rounds = int(args.n_rounds)
+
 n_hiddens = [4,4]
+n_summary = 7
 n_components = 1
-
-name = '_ss999_4x4neur_3x4k'
-direct_out = 'plots/dap_models' + name + '/'
-
 
 
 # Setup Priors
@@ -83,7 +107,6 @@ samples_prior = prior_unif.gen(n_samples=int(5e5))
 samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 
 # Plots
-print(posteriors[-1].mean)
 x_post = syn_obs_data(i_inj[0], dt, posteriors[-1].mean)
 idx = np.arange(0, len(x_o['data']))
 
@@ -125,10 +148,6 @@ axes[1, 1].set_title('posterior')
 # Create Weights Plots
 print('Generating Plots')
 
-if not os.path.exists(direct_out):
-    print('creating output directory')
-    os.makedirs(direct_out)
-
 g_loss = logs_to_plot(logs, 'loss')
 g_meansW0 = logs_to_plot(logs, 'means.mW0', melted=True)
 g_precisionsW0 = logs_to_plot(logs, 'precisions.mW0', melted=True)
@@ -154,6 +173,20 @@ g_meansb0.savefig(direct_out + 'meansb0.png', bbox_inches='tight')
 g_precisionsb0.savefig(direct_out + 'precisionsb0.png', bbox_inches='tight')
 g_h1b.savefig(direct_out + 'h1b.png', bbox_inches='tight')
 
+# Saving data
+print('Saving data')
+save_pkl(M, directory + '/dap_model' + args.name)
+save_pkl(s, directory + '/dap_stats' + args.name)
+save_pkl(S, directory + '/dap_stats_data' + args.name)
+save_pkl(G, directory + '/dap_gen' + args.name)
+
+save_pkl(logs, directory + '/dap_logs' + args.name)
+save_pkl(tds, directory + '/dap_tds' + args.name)
+save_pkl(posteriors, directory + '/dap_posteriors' + args.name)
+save_pkl(prior, directory + '/dap_prior' + args.name)
+save_pkl(params, directory + '/dap_params' + args.name)
+save_pkl(labels, directory + '/dap_labels' + args.name)
+
 
 # Save hyperparameters
 hyper = {
@@ -170,4 +203,3 @@ hyper = {
 }
 
 hyperparams = pd.DataFrame(hyper, index=[0])
-hyperparams
