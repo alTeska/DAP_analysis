@@ -19,17 +19,17 @@ from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", help="file name")
-parser.add_argument("-ns", "--n_samples",
+parser.add_argument("-n", "--name", default='', help="file name")
+parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
-parser.add_argument("-nr", "--n_rounds",
+parser.add_argument("-nr", "--n_rounds", default=1, type=int,
                     help="number of rounds")
 
-args = parser.parse_args()
+parser.add_argument('-nh', '--hiddens', action='store', type=int, nargs='*',
+                    default=[4])
 
-if args.name  is None: args.name = ''
-if args.n_samples is None: args.n_samples = '10'
-if args.n_rounds is None: args.n_rounds = '1'
+
+args = parser.parse_args()
 
 directory = 'pickle/dap_model' + args.name
 direct_out = 'plots/dap_models' + args.name + '/'
@@ -42,13 +42,12 @@ if not os.path.exists(direct_out):
     print('creating output directory')
     os.makedirs(direct_out)
 
-n_samples = int(args.n_samples)
-n_rounds = int(args.n_rounds)
+n_hiddens = args.hiddens
+n_samples = args.n_samples
+n_rounds = args.n_rounds
 
-n_hiddens = [4,4]
 n_summary = 7
 n_components = 1
-
 
 # Setup Priors
 prior_min = np.array([0, 1])
@@ -132,7 +131,7 @@ axes[1].legend()
 axes[0].set_title('both')
 axes[1].set_title('both')
 
-plt.show()
+# plt.show()
 
 distr, axes = plt.subplots(2, 2, figsize=(16, 14))
 
@@ -190,7 +189,7 @@ save_pkl(labels, directory + '/dap_labels' + args.name)
 
 # Save hyperparameters
 hyper = {
-    'name': name,
+    'name': args.name,
     'n_rounds' : n_rounds,
     'n_summary': n_summary,
     'n_samples' : n_samples,
@@ -203,3 +202,4 @@ hyper = {
 }
 
 hyperparams = pd.DataFrame(hyper, index=[0])
+hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')

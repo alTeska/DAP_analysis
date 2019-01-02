@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from utils_analysis import simulate_data_distr, logs_to_plot
@@ -170,4 +171,4 @@ hyper = {
 }
 
 hyperparams = pd.DataFrame(hyper, index=[0])
-hyperparams
+hyperparams.to_csv(path_or_buf=direct_out)
