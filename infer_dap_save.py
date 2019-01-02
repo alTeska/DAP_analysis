@@ -16,9 +16,9 @@ from DAPmodel.cell_fitting.read_heka import (get_sweep_index_for_amp,
 from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
 # General Settings Pick
-n_rounds = 3
+n_rounds = 1
 n_summary = 7
-n_samples = 4000
+n_samples = 10
 n_hiddens = [4,4]
 n_components = 1
 
@@ -28,11 +28,11 @@ direct_out = 'plots/dap_models' + name + '/'
 
 
 # Setup Priors
-prior_min = np.array([0, 1])
-prior_max = np.array([0.5, 30])
+prior_min = np.array([0  , 1 , 0  , -30, 0  , -100, -100, 1 , -30, 1 ])
+prior_max = np.array([0.5, 30, 100, -1 , 100, 0   , 0   , 30, -1 , 30])
 
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
-prior_gauss = prior(prior_max)
+# prior_gauss = prior(prior_max)
 
 # Load the data
 data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
@@ -61,7 +61,7 @@ x_o =  {'data': v,
         'dt': t[1]-t[0],
         'I': i_inj[0]}
 
-params, labels = obs_params()
+params, labels = obs_params(reduced_model=False)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
@@ -99,29 +99,20 @@ axes[1].step(idx, x_post['data'], label='posterior')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
 
-distr_comb, axes = plt.subplots(2, 1, figsize=(16, 14))
-axes[0].hist(samples_prior[:, 0], bins='auto', label='prior')
-axes[1].hist(samples_prior[:, 1], bins='auto', label='prior')
-axes[0].hist(samples_posterior[:, 0], bins='auto', label='posterior')
-axes[1].hist(samples_posterior[:, 1], bins='auto', label='posterior')
-axes[0].legend()
-axes[1].legend()
 
-axes[0].set_title('both')
-axes[1].set_title('both')
+hl = int(len(labels)/2)
+distr_comb, axes = plt.subplots(hl, 2, figsize=(16, 14))
+
+for ii, l in enumerate(labels):
+    i = ii % hl
+    j =int( ii/ hl)
+    axes[i,j].hist(samples_prior[:, ii], bins='auto', label='prior')
+    axes[i,j].hist(samples_posterior[:, ii], bins='auto', label='posterior')
+    axes[i,j].legend()
+    axes[i,j].set_title(l)
+
 
 plt.show()
-
-distr, axes = plt.subplots(2, 2, figsize=(16, 14))
-
-axes[0, 0].hist(samples_prior[:, 0], bins='auto')
-axes[1, 0].hist(samples_prior[:, 1], bins='auto')
-axes[0, 1].hist(samples_posterior[:, 0], bins='auto')
-axes[1, 1].hist(samples_posterior[:, 1], bins='auto')
-axes[0, 0].set_title('prior')
-axes[1, 0].set_title('prior')
-axes[0, 1].set_title('posterior')
-axes[1, 1].set_title('posterior')
 
 # Create Weights Plots
 print('Generating Plots')
@@ -143,7 +134,6 @@ g_h1b = logs_to_plot(logs, 'h1.mb', melted=True)
 # Saving plots
 print('Saving Plots')
 simulation.savefig(direct_out + 'simulation.png', bbox_inches='tight')
-distr.savefig(direct_out + 'distr.png', bbox_inches='tight')
 distr_comb.savefig(direct_out + 'distr_comb.png', bbox_inches='tight')
 
 g_loss.savefig(direct_out + 'loss.png', bbox_inches='tight')
