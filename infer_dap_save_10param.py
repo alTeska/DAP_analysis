@@ -32,7 +32,6 @@ prior_min = np.array([0  , 1 , 0  , -30, 0  , -100, -100, 1 , -30, 1 ])
 prior_max = np.array([0.5, 30, 100, -1 , 100, 0   , 0   , 30, -1 , 30])
 
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
-# prior_gauss = prior(prior_max)
 
 # Load the data
 data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
