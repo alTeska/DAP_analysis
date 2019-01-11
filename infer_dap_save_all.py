@@ -9,12 +9,12 @@ from delfi.generator import Default
 from delfi.inference import SNPE
 from delfi.utils.io import save_pkl
 
-from DAPmodel.utils import prior, obs_params, syn_obs_stats, syn_obs_data
-from DAPmodel.DAPSumStats import DAPSummaryStatsA
-from DAPmodel.DAPsimulator import DAPSimulator
-from DAPmodel.cell_fitting.read_heka import (get_sweep_index_for_amp,
+from dap.utils import prior, obs_params, syn_obs_stats, syn_obs_data
+from dap.dap_sumstats import DAPSummaryStats
+from dap.dap_simulator import DAPSimulator
+from dap.cell_fitting.read_heka import (get_sweep_index_for_amp,
                                              get_i_inj_from_function)
-from DAPmodel.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
+from dap.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
 
 # General Settings Pick
@@ -91,7 +91,7 @@ S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
-s = DAPSummaryStatsA(t_on, t_off, n_summary=n_summary)
+s = DAPSummaryStats(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
