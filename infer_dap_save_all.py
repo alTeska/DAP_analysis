@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 
 from utils_analysis import logs_to_plot
 from delfi.distribution import Uniform
-from delfi.generator import Default
-from delfi.inference import SNPE
+from delfi.generator import Default, MPGenerator
+from delfi.inference import SNPE, Basic, CDELFI
 from delfi.utils.io import save_pkl
 
 from dap.utils import prior, obs_params, syn_obs_stats, syn_obs_data
@@ -95,11 +95,15 @@ s = DAPSummaryStats(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
-inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
+# inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
+#                 pilot_samples=10, prior_norm=True)
+
+inf_snpe = Basic(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
                 pilot_samples=10, prior_norm=True)
 
+
 logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
-                                     proposal=prior_unif, monitor=observables)
+                                     monitor=observables)
 
 # Analyse results
 samples_prior = prior_unif.gen(n_samples=int(5e5))

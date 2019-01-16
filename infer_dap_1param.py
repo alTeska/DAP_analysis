@@ -16,10 +16,10 @@ from dap.cell_fitting.read_heka import (get_sweep_index_for_amp,
 from dap.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 
 # General Settings Pick
-n_rounds = 1
+n_rounds = 2
 n_summary = 10
-n_samples = 2000
-n_hiddens = [200, 200]
+n_samples = 3000
+n_hiddens = [400, 400]
 n_components = 1
 
 name = '_ss999_4x4neur_3x4k'
@@ -27,8 +27,8 @@ direct_out = 'plots/dap_models' + name + '/'
 
 
 # Setup Priors
-prior_min = np.array([0, 1 ])
-prior_max = np.array([2, 30])
+prior_min = np.array([0])
+prior_max = np.array([1])
 
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 # prior_gauss = prior(prior_max)
@@ -60,7 +60,10 @@ x_o =  {'data': v,
         'dt': t[1]-t[0],
         'I': i_inj[0]}
 
-params, labels = obs_params(reduced_model=True)
+# params, labels = obs_params(reduced_model=True)
+params = np.zeros(1)
+params[0] = 0.1527  # gbar_nap
+labels = ['gbar_nap']
 
 
 # Summary Statistics
@@ -73,11 +76,11 @@ s = DAPSummaryStats(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
-# inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
-#                 pilot_samples=10, prior_norm=True)
-
 inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
                 pilot_samples=10, prior_norm=True)
+
+# inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
+                # pilot_samples=10, prior_norm=True)
 
 
 
@@ -90,8 +93,6 @@ samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 
 # Plots
 print('posterior:', posteriors[-1].mean)
-# posterior = posteriors[-1]
-# plt.plot(posterior.eval(np.arange(-5.0, 5.0, 0.01).reshape(-1,1), log=False), '-b')
 
 x_post = syn_obs_data(i_inj[0], dt, posteriors[-1].mean)
 idx = np.arange(0, len(x_o['data']))
@@ -108,23 +109,15 @@ axes[1].set_title('Voltage trace')
 axes[1].legend()
 
 
-distr_comb, axes = plt.subplots(2, 1, figsize=(16, 14))
-axes[0].hist(samples_prior[:, 0], bins='auto', label='prior')
-axes[1].hist(samples_prior[:, 1], bins='auto', label='prior')
-axes[0].hist(samples_posterior[:, 0], bins='auto', label='posterior')
-axes[1].hist(samples_posterior[:, 1], bins='auto', label='posterior')
-axes[0].legend()
-axes[1].legend()
+distr_comb, axes = plt.subplots(1, 1, figsize=(16, 14))
+axes.hist(samples_prior[:, 0], bins='auto', label='prior')
+axes.hist(samples_posterior[:, 0], bins='auto', label='posterior')
+axes.legend()
 
-axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 2)),
+axes.annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 2)),
                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
                    xytext=(-5, 5), textcoords='offset points',
                    ha='right', va='bottom')
-axes[1].annotate(labels[0]+': '+str(round(posteriors[-1].mean[1], 2)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
-
 
 plt.show()
 
