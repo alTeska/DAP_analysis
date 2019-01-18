@@ -16,7 +16,7 @@ from dap import DAPcython
 # General Settings Pick
 n_rounds = 1
 n_summary = 9
-n_samples = 10
+n_samples = 8000
 n_hiddens = [50, 50]
 n_components = 1
 dt = 0.01
@@ -26,8 +26,8 @@ reg_lambda = 0.01
 I, t, t_on, t_off = syn_current(duration=70, dt=0.01, t_on=15, t_off=20, amp=3.1)
 params, labels = obs_params()
 
-# labels = ['gbar_nap', 'nap_m_vs', 'nap_m_tau_max']
-# np.array([0.01527, 16.11, 15.332])
+labels = ['gbar_nap', 'nap_m_vs', 'nap_m_tau_max']
+np.array([0.01527, 16.11, 15.332])
 params[0] *= 10
 
 
@@ -42,8 +42,8 @@ x_o =  {'data': U,
         'I': I}
 # Prior
 # Setup Priors
-prior_min = np.array([0, 1 ])
-prior_max = np.array([5, 30])
+prior_min = np.array([0, 1 , 0])
+prior_max = np.array([5, 30, 100])
 
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
@@ -89,19 +89,26 @@ axes[1].set_title('Voltage trace')
 axes[1].legend()
 
 
-distr_comb, axes = plt.subplots(2, 1, figsize=(16, 14))
+distr_comb, axes = plt.subplots(3, 1, figsize=(16, 14))
 axes[0].hist(samples_prior[:, 0], bins='auto', label='prior')
 axes[1].hist(samples_prior[:, 1], bins='auto', label='prior')
+axes[2].hist(samples_prior[:, 2], bins='auto', label='prior')
 axes[0].hist(samples_posterior[:, 0], bins='auto', label='posterior')
 axes[1].hist(samples_posterior[:, 1], bins='auto', label='posterior')
+axes[2].hist(samples_posterior[:, 2], bins='auto', label='posterior')
 axes[0].legend()
 axes[1].legend()
+axes[2].legend()
 
 axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 3)),
                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
                    xytext=(-5, 5), textcoords='offset points',
                    ha='right', va='bottom')
 axes[1].annotate(labels[0]+': '+str(round(posteriors[-1].mean[1], 3)),
+                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                   xytext=(-5, 5), textcoords='offset points',
+                   ha='right', va='bottom')
+axes[2].annotate(labels[0]+': '+str(round(posteriors[-1].mean[2], 3)),
                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
                    xytext=(-5, 5), textcoords='offset points',
                    ha='right', va='bottom')
