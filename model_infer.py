@@ -1,14 +1,11 @@
-import os
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
-from utils_analysis import simulate_data_distr, logs_to_plot
 from delfi.distribution import Uniform
 from delfi.generator import Default
-from delfi.inference import SNPE, Basic, CDELFI
+from delfi.inference import SNPE#, Basic, CDELFI
 
-from dap.utils import prior, obs_params, syn_obs_stats, syn_obs_data, syn_current
+from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, syn_current
 from dap.dap_sumstats import DAPSummaryStats
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
@@ -16,35 +13,31 @@ from dap import DAPcython
 # General Settings Pick
 n_rounds = 1
 n_summary = 9
-n_samples = 10
-n_hiddens = [50, 50]
+n_samples = 100
+n_hiddens = [15, 15]
 n_components = 1
 dt = 0.01
 reg_lambda = 0.01
 
 # Get current
-I, t, t_on, t_off = syn_current(duration=70, dt=0.01, t_on=15, t_off=20, amp=3.1)
-params, labels = obs_params()
-
-# labels = ['gbar_nap', 'nap_m_vs', 'nap_m_tau_max']
-# np.array([0.01527, 16.11, 15.332])
-params[0] *= 10
-
+I, t, t_on, t_off = syn_current(duration=70, dt=dt, t_on=15, t_off=20, amp=3.1)
+params, labels = obs_params_gbar(reduced_model=True)
+print(params)
+print(labels)
 
 # Set up themodel
-dap = DAPcython(-75, params)
+dap = DAPcython(-75, params*10)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE
-x_o =  {'data': U,
-        'time': t,
-        'dt': dt,
-        'I': I}
-# Prior
-# Setup Priors
-prior_min = np.array([0, 1 ])
-prior_max = np.array([5, 30])
+x_o = {'data': U,
+       'time': t,
+       'dt': dt,
+       'I': I}
 
+# Setup Priors
+prior_min = np.array([0, 0])
+prior_max = np.array([1, 1])
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics
@@ -58,7 +51,8 @@ G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
 inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
-                reg_lambda=reg_lambda, pilot_samples=10, prior_norm=True)
+                # reg_lambda=reg_lambda, pilot_samples=0, prior_norm=True)
+                reg_lambda=reg_lambda, pilot_samples=0)
 
 logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
                                      proposal=prior_unif)
