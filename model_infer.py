@@ -13,8 +13,8 @@ from dap import DAPcython
 
 # General Settings Pick
 n_rounds = 1
-n_summary = 9
-n_samples = 100
+n_summary = 13
+n_samples = 8000
 n_hiddens = [15, 15]
 n_components = 1
 dt = 0.01
@@ -38,7 +38,7 @@ x_o = {'data': U.reshape(-1),
 
 # Setup Priors
 prior_min = np.array([0, 0])
-prior_max = np.array([1, 1])
+prior_max = np.array([2, 2])
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics
@@ -96,7 +96,7 @@ axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 3)),
                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
                    xytext=(-5, 5), textcoords='offset points',
                    ha='right', va='bottom')
-axes[1].annotate(labels[0]+': '+str(round(posteriors[-1].mean[1], 3)),
+axes[1].annotate(labels[1]+': '+str(round(posteriors[-1].mean[1], 3)),
                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
                    xytext=(-5, 5), textcoords='offset points',
                    ha='right', va='bottom')
