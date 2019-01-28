@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 
 from delfi.distribution import Uniform
 from delfi.generator import Default
-from delfi.inference import SNPE#, Basic, CDELFI
+from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, syn_current
 from dap.dap_sumstats import DAPSummaryStats
+from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
 
@@ -30,7 +31,7 @@ dap = DAPcython(-75, params*10)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE
-x_o = {'data': U,
+x_o = {'data': U.reshape(-1),
        'time': t,
        'dt': dt,
        'I': I}
@@ -42,11 +43,11 @@ prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=1, data=x_o)
+                  n_summary=n_summary, summary_stats=2, data=x_o)
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
-s = DAPSummaryStats(t_on, t_off, n_summary=n_summary)
+s = DAPSummaryStatsMoments(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
