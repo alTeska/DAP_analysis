@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import zscore
+from tqdm import tqdm
 
 from delfi.distribution import Uniform
 from dap.utils import obs_params_gbar, syn_current
@@ -8,10 +9,13 @@ from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap import DAPcython
 from dap.dap_simulator import DAPSimulator
 
+
 # General Settings Pick
 n_samples = 100
 n_summary = 13
 dt = 0.01
+percent_accept = 1
+
 
 # Get current
 I, t, t_on, t_off = syn_current(duration=70, dt=dt, t_on=15, t_off=20, amp=3.1)
@@ -35,19 +39,35 @@ y_o = {'data': U.reshape(-1),
        'I': I}
 y = stats.calc([y_o])
 
-# sample one parameter, simulate and get the summary statistics
-params = prior_unif.gen(n_samples=1)
-x_o = sim.gen_single(params[0])
 
-y_obs = stats.calc([x_o])
+# Sample Parameters
+params = prior_unif.gen(n_samples=n_samples)
 
-sum_stats = zscore(y, axis=1)
-obs_zt = zscore(y_obs, axis=1)
-print('sum_stats', sum_stats[0])
-print('obs_zt', obs_zt[0])
-#
-# # distance of the z-scored summary statistics 'sum_stats' to the z-scored observed data 'obs_zt'
-dist_sum_stats = np.linalg.norm((sum_stats-obs_zt),axis=1)
-dist_argsort = np.argsort(dist_sum_stats)
+# calculate the distance for each parameters
+norms = []
 
-print(dist_sum_stats)
+for p in tqdm(params):
+    x_o = sim.gen_single(p)
+    y_obs = stats.calc([x_o])
+    obs_zt = zscore(y_obs, axis=1)
+    dist_sum_stats = np.linalg.norm((sum_stats-obs_zt),axis=1)
+
+    norms.append(dist_sum_stats)
+
+# get the scores
+scores = N.transpose()[0]
+arg_sorted = np.argsort(scores)
+
+# rejection criterion
+percent_criterion = int(len(arg_sorted)*percent_accept/100)
+params_accept = params[dist_argsort[0:percent_criterion],:]*params
+
+# plot results
+fig, ax = plt.subplots(1,2,figsize=(10,5))
+ax[0].hist(x=P[:,0], bins='auto', alpha=0.7, rwidth=0.85);
+ax[1].hist(x=P[:,1], bins='auto', alpha=0.7, rwidth=0.85);
+ax[0].set_title(labels[0])
+ax[1].set_title(labels[1]);
+
+
+plt.show()
