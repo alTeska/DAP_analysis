@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,7 +18,7 @@ from dap.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
 # General Settings Pick
 n_rounds = 1
 n_summary = 17
-n_samples = 1000
+n_samples = 10
 n_hiddens = [20]
 n_components = 1
 reg_lambda = 0.01
