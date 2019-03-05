@@ -9,13 +9,11 @@ from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap import DAPcython
 from dap.dap_simulator import DAPSimulator
 
-
 # General Settings Pick
 n_samples = 100
 n_summary = 13
 dt = 0.01
 percent_accept = 1
-
 
 # Get current
 I, t, t_on, t_off = syn_current(duration=70, dt=dt, t_on=15, t_off=20, amp=3.1)
@@ -38,7 +36,6 @@ y_o = {'data': U.reshape(-1),
        'dt': dt,
        'I': I}
 y = stats.calc([y_o])
-
 
 # Sample Parameters
 params = prior_unif.gen(n_samples=n_samples)
@@ -68,6 +65,5 @@ ax[0].hist(x=P[:,0], bins='auto', alpha=0.7, rwidth=0.85);
 ax[1].hist(x=P[:,1], bins='auto', alpha=0.7, rwidth=0.85);
 ax[0].set_title(labels[0])
 ax[1].set_title(labels[1]);
-
 
 plt.show()
