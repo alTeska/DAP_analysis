@@ -97,6 +97,11 @@ M = DAPSimulator(x_o['I'], x_o['dt'], -75)
 s = DAPSummaryStatsMoments(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
+print('S', S)
+print('G', G.gen(1))
+
+S = np.array([S,S])
+
 # Runing the simulation
 inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
                 reg_lambda=reg_lambda, pilot_samples=0)
