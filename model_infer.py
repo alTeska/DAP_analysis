@@ -6,10 +6,10 @@ from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, syn_current
-from dap.dap_sumstats import DAPSummaryStats
 from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
+
 
 # General Settings Pick
 n_rounds = 1
@@ -43,7 +43,7 @@ prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=2, data=x_o)
+                  n_summary=n_summary, summary_stats=0, data=x_o)
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
@@ -93,13 +93,13 @@ axes[0].legend()
 axes[1].legend()
 
 axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
+                 xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                 xytext=(-5, 5), textcoords='offset points',
+                 ha='right', va='bottom')
 axes[1].annotate(labels[1]+': '+str(round(posteriors[-1].mean[1], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
+                 xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                 xytext=(-5, 5), textcoords='offset points',
+                 ha='right', va='bottom')
 
 plt.figure()
 plt.plot(logs[0]['loss'])

@@ -5,47 +5,28 @@ from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
-from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, syn_current
-from dap.dap_sumstats import DAPSummaryStats
+from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, load_current
 from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
-from dap.cell_fitting.read_heka import (get_sweep_index_for_amp,
-                                             get_i_inj_from_function)
-from dap.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
+
 
 # General Settings Pick
 n_rounds = 1
 n_summary = 17
-n_samples = 100
+n_samples = 5
 n_hiddens = [15, 15]
 n_components = 1
 reg_lambda = 0.01
 
-
 # Load the current
 data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
-protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
-ramp_amp = 3.1 # steps of 0.05 -0.15
-v_shift = -16  # shift for accounting for the liquid junction potential
-
-sweep_idx = get_sweep_index_for_amp(ramp_amp, protocol)
-
-v, t = get_v_and_t_from_heka(data_dir, protocol, sweep_idxs=[sweep_idx])
-v = shift_v_rest(v[0], v_shift)
-t = t[0]
-dt = t[1] - t[0]
-I, t_on, t_off = get_i_inj_from_function(protocol, [sweep_idx], t[-1], t[1]-t[0],
-                                             return_discontinuities=False)
-I=I[0]
-
-params, labels = obs_params_gbar(reduced_model=True)
-
-print(params)
-print(labels)
+# data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_11d.dat'  # second best cell
+I, v, t, t_on, t_off, dt = load_current(data_dir, protocol='rampIV', ramp_amp=3.1)
 
 # Set up themodel
-dap = DAPcython(-75, params*10)
+params, labels = obs_params_gbar(reduced_model=True)
+dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE
@@ -61,7 +42,7 @@ prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=2, data=x_o)
+                  n_summary=n_summary, summary_stats=0, data=x_o)
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
@@ -83,12 +64,9 @@ samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 
 print('posterior:', posteriors[-1].mean)
 
-
 x_post = syn_obs_data(I, dt, posteriors[-1].mean)
 idx = np.arange(0, len(x_o['data']))
-rmse = np.linalg.norm(x_o['data'] - x_post['data']) / len(x_o['data'])
-
-print('RMSE:', rmse)
+# rmse = np.linalg.norm(x_o['data'] - x_post['data']) / len(x_o['data'])
 
 simulation, axes = plt.subplots(2, 1, figsize=(16,14))
 axes[0].plot(idx, x_o['I'], c='g', label='goal')
@@ -111,13 +89,13 @@ axes[0].legend()
 axes[1].legend()
 
 axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
+                 xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                 xytext=(-5, 5), textcoords='offset points',
+                 ha='right', va='bottom')
 axes[1].annotate(labels[1]+': '+str(round(posteriors[-1].mean[1], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
+                 xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                 xytext=(-5, 5), textcoords='offset points',
+                 ha='right', va='bottom')
 
 plt.figure()
 plt.plot(logs[0]['loss'])

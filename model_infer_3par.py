@@ -1,22 +1,20 @@
-import os
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
-from utils_analysis import simulate_data_distr, logs_to_plot
 from delfi.distribution import Uniform
 from delfi.generator import Default
-from delfi.inference import SNPE, Basic, CDELFI
+from delfi.inference import SNPE
 
-from dap.utils import prior, obs_params, syn_obs_stats, syn_obs_data, syn_current
+from dap.utils import obs_params, syn_obs_stats, syn_obs_data, syn_current
 from dap.dap_sumstats import DAPSummaryStats
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
 
+
 # General Settings Pick
 n_rounds = 1
 n_summary = 9
-n_samples = 8000
+n_samples = 1
 n_hiddens = [50, 50]
 n_components = 1
 dt = 0.01
@@ -25,11 +23,6 @@ reg_lambda = 0.01
 # Get current
 I, t, t_on, t_off = syn_current(duration=70, dt=0.01, t_on=15, t_off=20, amp=3.1)
 params, labels = obs_params()
-
-labels = ['gbar_nap', 'nap_m_vs', 'nap_m_tau_max']
-np.array([0.01527, 16.11, 15.332])
-params[0] *= 10
-
 
 # Set up themodel
 dap = DAPcython(-75, params)
@@ -49,7 +42,7 @@ prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=1, data=x_o)
+                  n_summary=n_summary, summary_stats=0, data=x_o)
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
