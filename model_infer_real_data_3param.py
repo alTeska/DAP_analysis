@@ -37,7 +37,7 @@ print(params)
 print(labels)
 
 # Set up themodel
-dap = DAPcython(-75, params*10)
+dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE

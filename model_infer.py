@@ -14,7 +14,7 @@ from dap import DAPcython
 # General Settings Pick
 n_rounds = 1
 n_summary = 13
-n_samples = 8000
+n_samples = 8
 n_hiddens = [15, 15]
 n_components = 1
 dt = 0.01
@@ -27,7 +27,7 @@ print(params)
 print(labels)
 
 # Set up themodel
-dap = DAPcython(-75, params*10)
+dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE
