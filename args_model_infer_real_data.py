@@ -8,7 +8,8 @@ from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
-from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, load_current
+from dap.utils import (obs_params_gbar, syn_obs_stats, syn_obs_data,
+                       load_current, load_prior_ranges)
 from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
@@ -16,14 +17,15 @@ from dap import DAPcython
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", default='_3param', help="file name")
+parser.add_argument("-n", "--name", default='', help="file name")
 parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
 parser.add_argument("-nr", "--n_rounds", default=1, type=int,
                     help="number of rounds")
-
+parser.add_argument("-np", "--n_params", default=2, type=int,
+                    help="number of parameters")
 parser.add_argument('-nh', '--hiddens', action='store', type=int, nargs='*',
-                    default=[20])
+                    default=[15])
 
 args = parser.parse_args()
 
@@ -41,6 +43,7 @@ if not os.path.exists(direct_out):
 n_hiddens = args.hiddens
 n_samples = args.n_samples
 n_rounds = args.n_rounds
+n_params = args.n_params
 
 n_summary = 17
 n_components = 1
@@ -55,7 +58,7 @@ observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
 # Load the current
 data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
 protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
-ramp_amp=3.1
+ramp_amp = 3.1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
 
 # Set up themodel
@@ -70,9 +73,9 @@ x_o = {'data': v.reshape(-1),
        'I': I}
 
 # Setup Priors
-prior_min = np.array([0, 0])
-prior_max = np.array([2, 2])
+prior_min, prior_max, labels = load_prior_ranges(n_params)
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
+print(prior_min, prior_max, labels)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
@@ -100,6 +103,7 @@ print('posterior:', posteriors[-1].mean)
 x_post = syn_obs_data(I, dt, posteriors[-1].mean)
 idx = np.arange(0, len(x_o['data']))
 
+# Create Plots
 simulation, axes = plt.subplots(2, 1, figsize=(16,14))
 axes[0].plot(idx, x_o['I'], c='g', label='goal')
 axes[0].plot(idx, x_post['I'], label='posterior')
@@ -112,28 +116,47 @@ axes[1].set_title('Voltage trace')
 axes[1].legend()
 
 
-distr_comb, axes = plt.subplots(2, 1, figsize=(16, 14))
-axes[0].hist(samples_prior[:, 0], bins='auto', label='prior')
-axes[1].hist(samples_prior[:, 1], bins='auto', label='prior')
-axes[0].hist(samples_posterior[:, 0], bins='auto', label='posterior')
-axes[1].hist(samples_posterior[:, 1], bins='auto', label='posterior')
-axes[0].legend()
-axes[1].legend()
+if len(labels) > 4:
+    hl = int(len(labels)/2)
+    distr_comb, axes = plt.subplots(nrows=hl, ncols=2, figsize=(20, 16))
 
-axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 3)),
-                 xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                 xytext=(-5, 5), textcoords='offset points',
-                 ha='right', va='bottom')
-axes[1].annotate(labels[1]+': '+str(round(posteriors[-1].mean[1], 3)),
-                 xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                 xytext=(-5, 5), textcoords='offset points',
-                 ha='right', va='bottom')
+    for ii, l in enumerate(labels):
+        i = ii % hl
+        j = int(ii / hl)
+
+        axes[i,j].hist(samples_prior[:, ii], bins='auto', label='prior')
+        axes[i,j].hist(samples_posterior[:, ii], bins='auto', label='posterior')
+
+        axes[i,j].set_title(l)
+        axes[i,j].annotate(l+': '+str(round(posteriors[-1].mean[ii], 2)),
+                        xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                        xytext=(-5, 5), textcoords='offset points',
+                        ha='right', va='bottom')
+
+        axes[i,j].legend()
+
+else:
+    distr_comb, axes = plt.subplots(nrows=n_params, figsize=(20, 16))
+    for ii, l in enumerate(labels):
+
+        axes[ii].hist(samples_prior[:, ii], bins='auto', label='prior')
+        axes[ii].hist(samples_posterior[:, ii], bins='auto', label='posterior')
+
+        axes[ii].set_title(l)
+        axes[ii].annotate(l+': '+str(round(posteriors[-1].mean[ii], 2)),
+                        xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                        xytext=(-5, 5), textcoords='offset points',
+                        ha='right', va='bottom')
+
+        axes[ii].legend()
+
+
 
 loss, ax = plt.subplots(1,1)
 ax.plot(logs[0]['loss'])
 
 # Create Weights Plots
-print('Generating Plots')
+print('Generating wegiths Plots')
 
 g_loss = logs_to_plot(logs, 'loss')
 g_meansW0 = logs_to_plot(logs, 'means.mW0', melted=True)
