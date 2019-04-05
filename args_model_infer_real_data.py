@@ -116,39 +116,19 @@ axes[1].set_title('Voltage trace')
 axes[1].legend()
 
 
-if len(labels) > 4:
-    hl = int(len(labels)/2)
-    distr_comb, axes = plt.subplots(nrows=hl, ncols=2, figsize=(20, 16))
+distr_comb, axes = plt.subplots(nrows=n_params, figsize=(20, 16))
+for ii, l in enumerate(labels):
 
-    for ii, l in enumerate(labels):
-        i = ii % hl
-        j = int(ii / hl)
+    axes[ii].hist(samples_prior[:, ii], bins='auto', label='prior')
+    axes[ii].hist(samples_posterior[:, ii], bins='auto', label='posterior')
 
-        axes[i,j].hist(samples_prior[:, ii], bins='auto', label='prior')
-        axes[i,j].hist(samples_posterior[:, ii], bins='auto', label='posterior')
+    axes[ii].set_title(l)
+    axes[ii].annotate(l+': '+str(round(posteriors[-1].mean[ii], 2)),
+                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                    xytext=(-5, 5), textcoords='offset points',
+                    ha='right', va='bottom')
 
-        axes[i,j].set_title(l)
-        axes[i,j].annotate(l+': '+str(round(posteriors[-1].mean[ii], 2)),
-                        xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                        xytext=(-5, 5), textcoords='offset points',
-                        ha='right', va='bottom')
-
-        axes[i,j].legend()
-
-else:
-    distr_comb, axes = plt.subplots(nrows=n_params, figsize=(20, 16))
-    for ii, l in enumerate(labels):
-
-        axes[ii].hist(samples_prior[:, ii], bins='auto', label='prior')
-        axes[ii].hist(samples_posterior[:, ii], bins='auto', label='posterior')
-
-        axes[ii].set_title(l)
-        axes[ii].annotate(l+': '+str(round(posteriors[-1].mean[ii], 2)),
-                        xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                        xytext=(-5, 5), textcoords='offset points',
-                        ha='right', va='bottom')
-
-        axes[ii].legend()
+    axes[ii].legend()
 
 
 
