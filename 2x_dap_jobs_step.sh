@@ -1,46 +1,46 @@
 
-tmux new -s 21 -d
-tmux send-keys -t 21 '
+tmux new -s 121 -d
+tmux send-keys -t 121 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x21k -ns 21000 -nr 1 -nh 15 -np 3' C-m
 
-tmux new -s 22 -d
-tmux send-keys -t 22 '
+tmux new -s 122 -d
+tmux send-keys -t 122 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x22 -ns 22000 -nr 1 -nh 15 -np 3' C-m
 
-tmux new -s 23 -d
-tmux send-keys -t 23 '
+tmux new -s 123 -d
+tmux send-keys -t 123 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x23 -ns 23000 -nr 1 -nh 15 -np 3' C-m
 
-tmux new -s 24 -d
-tmux send-keys -t 24 '
+tmux new -s 124 -d
+tmux send-keys -t 124 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x24 -ns 24000 -nr 1 -nh 15 -np 3' C-m
 
-tmux new -s 25 -d
-tmux send-keys -t 25 '
+tmux new -s 125 -d
+tmux send-keys -t 125 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x25 -ns 15000 -nr 1 -nh 15 -np 3' C-m
 
-tmux new -s 26 -d
-tmux send-keys -t 26 '
+tmux new -s 126 -d
+tmux send-keys -t 126 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
@@ -48,16 +48,16 @@ cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x26 -ns 26000 -nr 1 -nh 15 -np 3' C-m
 
 
-tmux new -s 27 -d
-tmux send-keys -t 27 '
+tmux new -s 127 -d
+tmux send-keys -t 127 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x27 -ns 27000 -nr 1 -nh 15 -np 3' C-m
 
-tmux new -s 28 -d
-tmux send-keys -t 28 '
+tmux new -s 128 -d
+tmux send-keys -t 128 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
@@ -65,8 +65,8 @@ cd LFI_DAP/DAP_analysis
 python args_model_infer_step_current.py -n _3_param_1x15n_1x28 -ns 28000 -nr 1 -nh 15 -np 3' C-m
 
 
-tmux new -s 29 -d
-tmux send-keys -t 29 '
+tmux new -s 129 -d
+tmux send-keys -t 129 '
 cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
