@@ -10,7 +10,7 @@ from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
                        load_current, load_prior_ranges)
-from dap.dap_sumstats_step_moms import DAPSummaryStatsStepMoments
+from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
 
@@ -60,15 +60,16 @@ data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best
 protocol = 'IV' # 'IV' # 'rampIV' # 'Zap20'
 ramp_amp = 1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
-
+I_ramp, v_ramp, t_ramp, t_on_ramp, t_off_ramp, dt_ramp = load_current(data_dir, protocol='rampIV', ramp_amp=3.1)
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)
+U_ramp = dap.simulate(dt_ramp, t_ramp, I_ramp)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE
-x_o = {'data': v.reshape(-1),
+x_o = {'data': U.reshape(-1),
        'time': t,
        'dt': dt,
        'I': I}
@@ -80,7 +81,7 @@ print(prior_min, prior_max, labels)
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=0, data=x_o)
+                  n_summary=n_summary, summary_stats=1, data=x_o)
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
@@ -102,10 +103,12 @@ samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 print('posterior:', posteriors[-1].mean)
 
 x_post = syn_obs_data(I, dt, posteriors[-1].mean)
+x_post_ramp = syn_obs_data(I_ramp, dt_ramp, posteriors[-1].mean)
+
 idx = np.arange(0, len(x_o['data']))
 
 # Create Plots
-simulation, axes = plt.subplots(2, 1, figsize=(16,14))
+simulation, axes = plt.subplots(3, 1, figsize=(16,14))
 axes[0].plot(idx, x_o['I'], c='g', label='goal')
 axes[0].plot(idx, x_post['I'], label='posterior')
 axes[0].set_title('current')
@@ -115,6 +118,11 @@ axes[1].step(idx, x_o['data'], c='g', label='goal')
 axes[1].step(idx, x_post['data'], label='posterior')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
+
+axes[2].plot(t_ramp, U_ramp, c='g', label='goal')
+axes[2].plot(t_ramp, x_post_ramp['data'], label='posterior')
+axes[2].set_title('Voltage trace step current')
+axes[2].legend()
 
 
 distr_comb, axes = plt.subplots(nrows=n_params, figsize=(20, 16))
@@ -169,10 +177,10 @@ g_h1b.savefig(direct_out + 'h1b.png', bbox_inches='tight')
 hyper = {
     'name': args.name,
     'means': str(posteriors[-1].mean),
-    'n_rounds' : n_rounds,
+    'n_rounds': n_rounds,
     'n_summary': n_summary,
-    'n_samples' : n_samples,
-    'n_hidden' : str(n_hiddens),
+    'n_samples': n_samples,
+    'n_hidden': str(n_hiddens),
     'n_components': n_components,
     'protocol': protocol,
     'ramp_amp': ramp_amp,

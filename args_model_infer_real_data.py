@@ -178,10 +178,10 @@ g_h1b.savefig(direct_out + 'h1b.png', bbox_inches='tight')
 hyper = {
     'name': args.name,
     'means': str(posteriors[-1].mean),
-    'n_rounds' : n_rounds,
+    'n_rounds': n_rounds,
     'n_summary': n_summary,
-    'n_samples' : n_samples,
-    'n_hidden' : str(n_hiddens),
+    'n_samples': n_samples,
+    'n_hidden': str(n_hiddens),
     'n_components': n_components,
     'protocol': protocol,
     'ramp_amp': ramp_amp,
