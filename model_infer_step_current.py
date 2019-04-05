@@ -5,7 +5,8 @@ from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
-from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data, load_current
+from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
+                       load_current, load_prior_ranges)
 from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
@@ -14,17 +15,18 @@ from dap import DAPcython
 # General Settings Pick
 n_rounds = 1
 n_summary = 17
-n_samples = 2000
+n_samples = 5
 n_hiddens = [15]
 n_components = 1
 dt = 0.01
 reg_lambda = 0.01
+n_params = 2
 
 # Load the current
 data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol='IV', ramp_amp=1)
 
-params, labels = obs_params_gbar(reduced_model=True)
+params, labels = obs_params(reduced_model=True)
 print(params)
 print(labels)
 
@@ -39,8 +41,7 @@ x_o = {'data': U.reshape(-1),
        'I': I}
 
 # Setup Priors
-prior_min = np.array([0.05273, 0])
-prior_max = np.array([0.25264, 1])
+prior_min, prior_max, labels = load_prior_ranges(n_params)
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Summary Statistics

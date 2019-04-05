@@ -10,7 +10,7 @@ from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
                        load_current, load_prior_ranges)
-from dap.dap_sumstats_moments import DAPSummaryStatsMoments
+from dap.dap_sumstats_step_moms import DAPSummaryStatsStepMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
 
@@ -34,7 +34,7 @@ direct_out = 'plots/dap_models' + args.name + '/'
 
 if not os.path.exists(directory):
     print('creating directory')
-    os.makedirs(directory)
+    os.makedirs (directory)
 
 if not os.path.exists(direct_out):
     print('creating output directory')
@@ -57,9 +57,10 @@ observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
 
 # Load the current
 data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
-protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
-ramp_amp = 3.1
+protocol = 'IV' # 'IV' # 'rampIV' # 'Zap20'
+ramp_amp = 1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
+
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
@@ -83,7 +84,7 @@ S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
 
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
-s = DAPSummaryStatsMoments(t_on, t_off, n_summary=n_summary)
+s = DAPSummaryStatsStepMoments(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
