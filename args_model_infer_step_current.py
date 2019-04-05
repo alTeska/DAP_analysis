@@ -189,4 +189,4 @@ hyper = {
 }
 
 hyperparams = pd.DataFrame(hyper, index=[0])
-hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')
+hyperparams.to_csv(path_or_buf=direct_out + '/hyperparam.csv')
