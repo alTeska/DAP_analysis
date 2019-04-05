@@ -60,11 +60,14 @@ data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best
 protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
 ramp_amp = 3.1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
+I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, protocol='IV', ramp_amp=1)
+
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
+U_step = dap.simulate(dt_step, t_step, I_step)
 
 # generate data format for SNPE / OBSERVABLE
 x_o = {'data': v.reshape(-1),
@@ -101,19 +104,26 @@ samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 print('posterior:', posteriors[-1].mean)
 
 x_post = syn_obs_data(I, dt, posteriors[-1].mean)
+x_post_step = syn_obs_data(I_step, dt, posteriors[-1].mean)
+
 idx = np.arange(0, len(x_o['data']))
 
 # Create Plots
-simulation, axes = plt.subplots(2, 1, figsize=(16,14))
+simulation, axes = plt.subplots(3, 1, figsize=(16,14))
 axes[0].plot(idx, x_o['I'], c='g', label='goal')
 axes[0].plot(idx, x_post['I'], label='posterior')
 axes[0].set_title('current')
 axes[0].legend()
 
-axes[1].step(idx, x_o['data'], c='g', label='goal')
-axes[1].step(idx, x_post['data'], label='posterior')
+axes[1].plot(idx, x_o['data'], c='g', label='goal')
+axes[1].plot(idx, x_post['data'], label='posterior')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
+
+axes[2].plot(t_step, U_step, c='g', label='goal')
+axes[2].plot(t_step, x_post_step['data'], label='posterior')
+axes[2].set_title('Voltage trace step current')
+axes[2].legend()
 
 
 distr_comb, axes = plt.subplots(nrows=n_params, figsize=(20, 16))
