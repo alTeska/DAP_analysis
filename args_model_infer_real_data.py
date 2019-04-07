@@ -116,12 +116,14 @@ axes[0].set_title('current')
 axes[0].legend()
 
 axes[1].plot(idx, x_o['data'], c='g', label='goal')
-axes[1].plot(idx, x_post['data'], label='posterior')
+axes[1].plot(idx, x_post['data'], c='b', label='posterior')
+axes[1].plot(idx, U, c='pink', label='best fit')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
 
-axes[2].plot(t_step, U_step, c='g', label='goal')
-axes[2].plot(t_step, x_post_step['data'], label='posterior')
+axes[2].plot(t_step, v_step, c='g', label='goal')
+axes[2].plot(t_step, x_post_step['data'], c='b', label='posterior')
+axes[2].plot(t_step, U_step, c='pink', label='best fit')
 axes[2].set_title('Voltage trace step current')
 axes[2].legend()
 
@@ -191,3 +193,8 @@ hyper = {
 
 hyperparams = pd.DataFrame(hyper, index=[0])
 hyperparams.to_csv(path_or_buf=direct_out + '/hyperparam.csv')
+
+# Save parameters
+parameters = pd.DataFrame(data=posteriors[-1].mean, index=labels,
+                          columns=['mean param'])
+parameters.to_csv(path_or_buf=direct_out + '/parameters.csv')

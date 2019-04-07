@@ -17,7 +17,7 @@ from dap import DAPcython
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", default='', help="file name")
+parser.add_argument("-n", "--name", default='_step', help="file name")
 parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
 parser.add_argument("-nr", "--n_rounds", default=1, type=int,
@@ -69,7 +69,7 @@ U_ramp = dap.simulate(dt_ramp, t_ramp, I_ramp)
 U = dap.simulate(dt, t, I)
 
 # generate data format for SNPE / OBSERVABLE
-x_o = {'data': U.reshape(-1),
+x_o = {'data': v.reshape(-1),
        'time': t,
        'dt': dt,
        'I': I}
@@ -97,8 +97,8 @@ logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
 
 
 # Analyse results
-samples_prior = prior_unif.gen(n_samples=int(5e5))
-samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
+samples_prior = prior_unif.gen(n_samples=int(10e5))
+samples_posterior = posteriors[-1].gen(n_samples=int(10e5))
 
 print('posterior:', posteriors[-1].mean)
 
@@ -115,13 +115,15 @@ axes[0].set_title('current')
 axes[0].legend()
 
 axes[1].step(idx, x_o['data'], c='g', label='goal')
-axes[1].step(idx, x_post['data'], label='posterior')
+axes[1].step(idx, x_post['data'], c='b', label='posterior')
+axes[1].plot(idx, U, c='pink', label='best fit')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
 
-axes[2].plot(t_ramp, U_ramp, c='g', label='goal')
-axes[2].plot(t_ramp, x_post_ramp['data'], label='posterior')
-axes[2].set_title('Voltage trace step current')
+axes[2].plot(t_ramp, v_ramp, c='g', label='goal')
+axes[2].plot(t_ramp, x_post_ramp['data'], c='b', label='posterior')
+axes[2].plot(t_ramp, U_ramp, c='pink', label='best fit')
+axes[2].set_title('Voltage trace ramp current')
 axes[2].legend()
 
 
@@ -190,3 +192,8 @@ hyper = {
 
 hyperparams = pd.DataFrame(hyper, index=[0])
 hyperparams.to_csv(path_or_buf=direct_out + '/hyperparam.csv')
+
+# Save parameters
+parameters = pd.DataFrame(data=posteriors[-1].mean, index=labels,
+                          columns=['mean param'])
+parameters.to_csv(path_or_buf=direct_out + '/parameters.csv')
