@@ -5,7 +5,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x11k -ns 11000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x11k -ns 11000 -nr 1 -nh 20 -np 4' C-m
 
 tmux new -s 12 -d
 tmux send-keys -t 12 '
@@ -13,7 +13,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x12 -ns 12000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x12 -ns 12000 -nr 1 -nh 20 -np 4' C-m
 
 tmux new -s 13 -d
 tmux send-keys -t 13 '
@@ -21,7 +21,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x13 -ns 13000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x13 -ns 13000 -nr 1 -nh 20 -np 4' C-m
 
 tmux new -s 14 -d
 tmux send-keys -t 14 '
@@ -29,7 +29,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x14 -ns 14000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x14 -ns 14000 -nr 1 -nh 20 -np 4' C-m
 
 tmux new -s 15 -d
 tmux send-keys -t 15 '
@@ -37,7 +37,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x15 -ns 15000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x15 -ns 15000 -nr 1 -nh 20 -np 4' C-m
 
 tmux new -s 16 -d
 tmux send-keys -t 16 '
@@ -45,7 +45,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x16 -ns 16000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x16 -ns 16000 -nr 1 -nh 20 -np 4' C-m
 
 
 tmux new -s 17 -d
@@ -54,7 +54,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x17 -ns 17000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x17 -ns 17000 -nr 1 -nh 20 -np 4' C-m
 
 tmux new -s 18 -d
 tmux send-keys -t 18 '
@@ -62,7 +62,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x18 -ns 18000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x18 -ns 18000 -nr 1 -nh 20 -np 4' C-m
 
 
 tmux new -s 19 -d
@@ -71,4 +71,4 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_real_data.py -n _3_param_1x15n_1x19 -ns 19000 -nr 1 -nh 15 -np 3' C-m
+python args_model_infer_real_data.py -n _4_param_1x20n_1x19 -ns 19000 -nr 1 -nh 20 -np 4' C-m
