@@ -61,13 +61,14 @@ protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
 ramp_amp = 3.1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
 I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, protocol='IV', ramp_amp=1)
-
+Istep = I_step[2500:18700]
+vstep = v_step[2500:18700]
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
-U_step = dap.simulate(dt_step, t_step, I_step)
+U_step = dap.simulate(dt_step, t_step, Istep)
 
 # generate data format for SNPE / OBSERVABLE
 x_o = {'data': v.reshape(-1),
@@ -84,8 +85,8 @@ print(prior_min, prior_max, labels)
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
                   n_summary=n_summary, summary_stats=0, data=x_o)
 
-
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
+
 s = DAPSummaryStatsMoments(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
