@@ -5,7 +5,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x1k -ns 1000 -nr 1 -nh 20 -np 4 ' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x1k -ns 1000 -nr 1 -nh 30 -np 5 ' C-m
 
 tmux new -s 102 -d
 tmux send-keys -t 102 '
@@ -13,7 +13,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x2 -ns 2000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x2 -ns 2000 -nr 1 -nh 30 -np 5' C-m
 
 tmux new -s 103 -d
 tmux send-keys -t 103 '
@@ -21,7 +21,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x3 -ns 3000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x3 -ns 3000 -nr 1 -nh 30 -np 5' C-m
 
 tmux new -s 104 -d
 tmux send-keys -t 104 '
@@ -29,7 +29,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x4 -ns 4000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x4 -ns 4000 -nr 1 -nh 30 -np 5' C-m
 
 tmux new -s 105 -d
 tmux send-keys -t 105 '
@@ -37,7 +37,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x5 -ns 5000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x5 -ns 5000 -nr 1 -nh 30 -np 5' C-m
 
 tmux new -s 106 -d
 tmux send-keys -t 106 '
@@ -45,7 +45,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x6 -ns 6000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x6 -ns 6000 -nr 1 -nh 30 -np 5' C-m
 
 
 tmux new -s 107 -d
@@ -54,7 +54,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x7 -ns 7000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x7 -ns 7000 -nr 1 -nh 30 -np 5' C-m
 
 tmux new -s 108 -d
 tmux send-keys -t 108 '
@@ -62,7 +62,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x8 -ns 8000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x8 -ns 8000 -nr 1 -nh 30 -np 5' C-m
 
 
 tmux new -s 109 -d
@@ -71,7 +71,7 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x9 -ns 9000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x9 -ns 9000 -nr 1 -nh 30 -np 5' C-m
 
 tmux new -s 110 -d
 tmux send-keys -t 110 '
@@ -79,4 +79,4 @@ cd
 export PATH="anaconda3/bin:$PATH"
 source activate dap
 cd LFI_DAP/DAP_analysis
-python args_model_infer_step_current.py -n _step_4_param_1x20n_1x10 -ns 10000 -nr 1 -nh 20 -np 4' C-m
+python args_model_infer_step_current.py -n _step_5_param_1x30n_1x10 -ns 10000 -nr 1 -nh 30 -np 5' C-m
