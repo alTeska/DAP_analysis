@@ -10,14 +10,19 @@ from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
                        load_current, load_prior_ranges)
-from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
+from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
+
+from dap.dap_sim_multi_protocol import DAPSimulatorMultiProtocol
+from dap.dap_sumstats_moments import DAPSummaryStatsMoments
+from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
+from dap.dap_generator import DAPDefault
 
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", default='_step', help="file name")
+parser.add_argument("-n", "--name", default='_2protocol', help="file name")
 parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
 parser.add_argument("-nr", "--n_rounds", default=1, type=int,
@@ -34,7 +39,7 @@ direct_out = 'plots/dap_models' + args.name + '/'
 
 if not os.path.exists(directory):
     print('creating directory')
-    os.makedirs (directory)
+    os.makedirs(directory)
 
 if not os.path.exists(direct_out):
     print('creating output directory')
@@ -57,16 +62,23 @@ observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
 
 # Load the current
 data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
-protocol = 'IV' # 'IV' # 'rampIV' # 'Zap20'
-ramp_amp = 1
+protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
+ramp_amp = 3.1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
-I_ramp, v_ramp, t_ramp, t_on_ramp, t_off_ramp, dt_ramp = load_current(data_dir, protocol='rampIV', ramp_amp=3.1)
+I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, protocol='IV', ramp_amp=1)
+Istep = I_step[2500:18700]
+vstep = v_step[2500:18700]
+
+I_all = [Istep, I]
+dt_all = [dt_step, dt]
+
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)
-U_ramp = dap.simulate(dt_ramp, t_ramp, I_ramp)
 U = dap.simulate(dt, t, I)
+U_step = dap.simulate(dt_step, t_step, I_step)
+Ustep = U_step[2500:18700]
 
 # generate data format for SNPE / OBSERVABLE
 x_o = {'data': v.reshape(-1),
@@ -74,21 +86,35 @@ x_o = {'data': v.reshape(-1),
        'dt': dt,
        'I': I}
 
+x_step = {'data': v_step.reshape(-1),
+          'time': t_step,
+          'dt': dt_step,
+          'I': I_step}
+
+
 # Setup Priors
 prior_min, prior_max, labels = load_prior_ranges(n_params)
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 print(prior_min, prior_max, labels)
 
 # Summary Statistics
-S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=1, data=x_o)
+# calcualte summary statistics
+sum_stats_step = DAPSummaryStatsStepMoments(t_on_step, t_off_step, n_summary=17)
+sum_stats_mom = DAPSummaryStatsMoments(t_on, t_off, n_summary=17)
+sum_stats = [sum_stats_step, sum_stats_mom]
 
+s_step = sum_stats_step.calc([x_step])
+s_ramp = sum_stats_mom.calc([x_o])
+S = [s_ramp, s_step]
+# S = s_step
+print('summary starts observed:',S)
 
-M = DAPSimulator(x_o['I'], x_o['dt'], -75)
-s = DAPSummaryStatsStepMoments(t_on, t_off, n_summary=n_summary)
-G = Default(model=M, prior=prior_unif, summary=s)  # Generator
+# S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
+                  # n_summary=n_summary, summary_stats=0, data=x_o)
+dap1 = DAPSimulatorMultiProtocol(I_all, dt_all, -75)
+# M = DAPSimulator(x_o['I'], x_o['dt'], -75)
 
-S=[S,S]
+G = DAPDefault(model=dap1, prior=prior_unif, summary=sum_stats)  # Generator
 
 # Runing the simulation
 inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
@@ -99,13 +125,13 @@ logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
 
 
 # Analyse results
-samples_prior = prior_unif.gen(n_samples=int(10e5))
-samples_posterior = posteriors[-1].gen(n_samples=int(10e5))
+samples_prior = prior_unif.gen(n_samples=int(5e5))
+samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 
 print('posterior:', posteriors[-1].mean)
 
 x_post = syn_obs_data(I, dt, posteriors[-1].mean)
-x_post_ramp = syn_obs_data(I_ramp, dt_ramp, posteriors[-1].mean)
+x_post_step = syn_obs_data(I_step, dt, posteriors[-1].mean)
 
 idx = np.arange(0, len(x_o['data']))
 
@@ -116,16 +142,16 @@ axes[0].plot(idx, x_post['I'], label='posterior')
 axes[0].set_title('current')
 axes[0].legend()
 
-axes[1].step(idx, x_o['data'], c='g', label='goal')
-axes[1].step(idx, x_post['data'], c='b', label='posterior')
+axes[1].plot(idx, x_o['data'], c='g', label='goal')
+axes[1].plot(idx, x_post['data'], c='b', label='posterior')
 axes[1].plot(idx, U, c='pink', label='best fit')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
 
-axes[2].plot(t_ramp, v_ramp, c='g', label='goal')
-axes[2].plot(t_ramp, x_post_ramp['data'], c='b', label='posterior')
-axes[2].plot(t_ramp, U_ramp, c='pink', label='best fit')
-axes[2].set_title('Voltage trace ramp current')
+axes[2].plot(t_step, v_step, c='g', label='goal')
+axes[2].plot(t_step, x_post_step['data'], c='b', label='posterior')
+axes[2].plot(t_step, U_step, c='pink', label='best fit')
+axes[2].set_title('Voltage trace step current')
 axes[2].legend()
 
 
