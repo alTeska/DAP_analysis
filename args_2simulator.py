@@ -99,22 +99,16 @@ print(prior_min, prior_max, labels)
 # calcualte summary statistics
 sum_stats_step = DAPSummaryStatsStepMoments(t_on_step, t_off_step, n_summary=17)
 sum_stats_mom = DAPSummaryStatsMoments(t_on, t_off, n_summary=17)
-sum_stats = [sum_stats_step, sum_stats_mom]
 
 s_step = sum_stats_step.calc([x_step])
 s_ramp = sum_stats_mom.calc([x_o])
-# S = s_step
-print('summary starts observed:',S)
-
-# S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  # n_summary=n_summary, summary_stats=0, data=x_o)
 dap1 = DAPSimulatorMultiProtocol(I_all, dt_all, -75)
-# M = DAPSimulator(x_o['I'], x_o['dt'], -75)
 
-G = DAPDefault(model=dap1, prior=prior_unif, summary=sum_stats)  # Generator
+
+G = Default(model=dap1, prior=prior_unif, summary=sum_stats_step)  # Generator
 
 # Runing the simulation
-inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
+inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=s_step,
                 reg_lambda=reg_lambda, pilot_samples=0)
 
 logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,

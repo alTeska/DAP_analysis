@@ -9,8 +9,6 @@ from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import (obs_params, syn_obs_data, load_current, load_prior_ranges)
-from dap.dap_sumstats_moments import DAPSummaryStatsMoments
-from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
 
 from dap.dap_sim_multi_protocol import DAPSimulatorMultiProtocol
