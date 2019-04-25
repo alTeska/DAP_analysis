@@ -23,7 +23,7 @@ reg_lambda = 0.01
 n_params = 2
 
 # Load the current
-data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
+data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
 protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
 ramp_amp = 3.1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)

@@ -2,31 +2,33 @@ import argparse, os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
 from utils_analysis import logs_to_plot
+
 from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
-from dap.utils import obs_params_gbar, syn_obs_stats, syn_obs_data
+from dap.utils import (obs_params, syn_obs_data, load_current, load_prior_ranges)
 from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
-from dap.cell_fitting.read_heka import (get_sweep_index_for_amp,
-                                        get_i_inj_from_function)
-from dap.cell_fitting.read_heka import get_v_and_t_from_heka, shift_v_rest
+
+from dap.dap_sim_multi_protocol import DAPSimulatorMultiProtocol
+from dap.dap_sumstats_moments import DAPSummaryStatsMoments
+from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
 
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", default='_4param', help="file name")
+parser.add_argument("-n", "--name", default='_2protocol', help="file name")
 parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
 parser.add_argument("-nr", "--n_rounds", default=1, type=int,
                     help="number of rounds")
-
+parser.add_argument("-np", "--n_params", default=2, type=int,
+                    help="number of parameters")
 parser.add_argument('-nh', '--hiddens', action='store', type=int, nargs='*',
-                    default=[30])
+                    default=[15])
 
 args = parser.parse_args()
 
@@ -44,6 +46,7 @@ if not os.path.exists(direct_out):
 n_hiddens = args.hiddens
 n_samples = args.n_samples
 n_rounds = args.n_rounds
+n_params = args.n_params
 
 n_summary = 17
 n_components = 1
@@ -58,24 +61,22 @@ observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
 # Load the current
 data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
 protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
-ramp_amp = 3.1 # steps of 0.05 -0.15
-v_shift = -16  # shift for accounting for the liquid junction potential
+ramp_amp = 3.1
+I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
+I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, protocol='IV', ramp_amp=1)
+Istep = I_step[2500:18700]
+vstep = v_step[2500:18700]
 
-sweep_idx = get_sweep_index_for_amp(ramp_amp, protocol)
+I_all = [Istep, I]
+dt_all = [dt_step, dt]
 
-v, t = get_v_and_t_from_heka(data_dir, protocol, sweep_idxs=[sweep_idx])
-v = shift_v_rest(v[0], v_shift)
-t = t[0]
-dt = t[1] - t[0]
-I, t_on, t_off = get_i_inj_from_function(protocol, [sweep_idx], t[-1], t[1]-t[0],
-                                             return_discontinuities=False)
-I=I[0]
-
-params, labels = obs_params_gbar(reduced_model=False)
 
 # Set up themodel
-dap = DAPcython(-75, params*10)
+params, labels = obs_params(reduced_model=True)
+dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
+U_step = dap.simulate(dt_step, t_step, I_step)
+Ustep = U_step[2500:18700]
 
 # generate data format for SNPE / OBSERVABLE
 x_o = {'data': v.reshape(-1),
@@ -83,19 +84,34 @@ x_o = {'data': v.reshape(-1),
        'dt': dt,
        'I': I}
 
+x_step = {'data': v_step.reshape(-1),
+          'time': t_step,
+          'dt': dt_step,
+          'I': I_step}
+
+
 # Setup Priors
-prior_min = np.array([0, 0, 0, 0])
-prior_max = np.array([2, 2, 2, 2])
+prior_min, prior_max, labels = load_prior_ranges(n_params)
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
+print(prior_min, prior_max, labels)
 
 # Summary Statistics
-S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=2, data=x_o)
+# calcualte summary statistics
+sum_stats_step = DAPSummaryStatsStepMoments(t_on_step, t_off_step, n_summary=17)
+sum_stats_mom = DAPSummaryStatsMoments(t_on, t_off, n_summary=17)
+sum_stats = [sum_stats_step, sum_stats_mom]
 
+s_step = sum_stats_step.calc([x_step])
+s_ramp = sum_stats_mom.calc([x_o])
+# S = s_step
+print('summary starts observed:',S)
 
-M = DAPSimulator(x_o['I'], x_o['dt'], -75)
-s = DAPSummaryStatsMoments(t_on, t_off, n_summary=n_summary)
-G = Default(model=M, prior=prior_unif, summary=s)  # Generator
+# S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
+                  # n_summary=n_summary, summary_stats=0, data=x_o)
+dap1 = DAPSimulatorMultiProtocol(I_all, dt_all, -75)
+# M = DAPSimulator(x_o['I'], x_o['dt'], -75)
+
+G = DAPDefault(model=dap1, prior=prior_unif, summary=sum_stats)  # Generator
 
 # Runing the simulation
 inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
@@ -112,61 +128,51 @@ samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
 print('posterior:', posteriors[-1].mean)
 
 x_post = syn_obs_data(I, dt, posteriors[-1].mean)
+x_post_step = syn_obs_data(I_step, dt, posteriors[-1].mean)
+
 idx = np.arange(0, len(x_o['data']))
-rmse = np.linalg.norm(x_o['data'] - x_post['data']) / len(x_o['data'])
 
-print('RMSE:', rmse)
-
-simulation, axes = plt.subplots(2, 1, figsize=(16,14))
+# Create Plots
+simulation, axes = plt.subplots(3, 1, figsize=(16,14))
 axes[0].plot(idx, x_o['I'], c='g', label='goal')
 axes[0].plot(idx, x_post['I'], label='posterior')
 axes[0].set_title('current')
 axes[0].legend()
 
-axes[1].step(idx, x_o['data'], c='g', label='goal')
-axes[1].step(idx, x_post['data'], label='posterior')
+axes[1].plot(idx, x_o['data'], c='g', label='goal')
+axes[1].plot(idx, x_post['data'], c='b', label='posterior')
+axes[1].plot(idx, U, c='pink', label='best fit')
 axes[1].set_title('Voltage trace')
 axes[1].legend()
 
-
-distr_comb, axes = plt.subplots(4, 1, figsize=(16, 14))
-axes[0].hist(samples_prior[:, 0], bins='auto', label='prior')
-axes[1].hist(samples_prior[:, 1], bins='auto', label='prior')
-axes[2].hist(samples_prior[:, 2], bins='auto', label='prior')
-axes[3].hist(samples_prior[:, 3], bins='auto', label='prior')
-axes[0].hist(samples_posterior[:, 0], bins='auto', label='posterior')
-axes[1].hist(samples_posterior[:, 1], bins='auto', label='posterior')
-axes[2].hist(samples_posterior[:, 2], bins='auto', label='posterior')
-axes[3].hist(samples_posterior[:, 3], bins='auto', label='posterior')
-axes[0].legend()
-axes[1].legend()
+axes[2].plot(t_step, v_step, c='g', label='goal')
+axes[2].plot(t_step, x_post_step['data'], c='b', label='posterior')
+axes[2].plot(t_step, U_step, c='pink', label='best fit')
+axes[2].set_title('Voltage trace step current')
 axes[2].legend()
-axes[3].legend()
 
-axes[0].annotate(labels[0]+': '+str(round(posteriors[-1].mean[0], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
-axes[1].annotate(labels[1]+': '+str(round(posteriors[-1].mean[1], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
 
-axes[2].annotate(labels[2]+': '+str(round(posteriors[-1].mean[1], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
-axes[3].annotate(labels[2]+': '+str(round(posteriors[-1].mean[1], 3)),
-                   xy=(1, 0), xycoords='axes fraction', fontsize=12,
-                   xytext=(-5, 5), textcoords='offset points',
-                   ha='right', va='bottom')
+distr_comb, axes = plt.subplots(nrows=n_params, figsize=(20, 16))
+for ii, l in enumerate(labels):
+
+    axes[ii].hist(samples_prior[:, ii], bins='auto', label='prior')
+    axes[ii].hist(samples_posterior[:, ii], bins='auto', label='posterior')
+
+    axes[ii].set_title(l)
+    axes[ii].annotate(l+': '+str(round(posteriors[-1].mean[ii], 2)),
+                    xy=(1, 0), xycoords='axes fraction', fontsize=12,
+                    xytext=(-5, 5), textcoords='offset points',
+                    ha='right', va='bottom')
+
+    axes[ii].legend()
+
 
 
 loss, ax = plt.subplots(1,1)
 ax.plot(logs[0]['loss'])
 
 # Create Weights Plots
-print('Generating Plots')
+print('Generating wegiths Plots')
 
 g_loss = logs_to_plot(logs, 'loss')
 g_meansW0 = logs_to_plot(logs, 'means.mW0', melted=True)
@@ -198,10 +204,10 @@ g_h1b.savefig(direct_out + 'h1b.png', bbox_inches='tight')
 hyper = {
     'name': args.name,
     'means': str(posteriors[-1].mean),
-    'n_rounds' : n_rounds,
+    'n_rounds': n_rounds,
     'n_summary': n_summary,
-    'n_samples' : n_samples,
-    'n_hidden' : str(n_hiddens),
+    'n_samples': n_samples,
+    'n_hidden': str(n_hiddens),
     'n_components': n_components,
     'protocol': protocol,
     'ramp_amp': ramp_amp,
@@ -210,4 +216,9 @@ hyper = {
 }
 
 hyperparams = pd.DataFrame(hyper, index=[0])
-hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')
+hyperparams.to_csv(path_or_buf=direct_out + '/hyperparam.csv')
+
+# Save parameters
+parameters = pd.DataFrame(data=posteriors[-1].mean, index=labels,
+                          columns=['mean param'])
+parameters.to_csv(path_or_buf=direct_out + '/parameters.csv')

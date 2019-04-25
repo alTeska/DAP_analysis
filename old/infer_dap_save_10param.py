@@ -34,7 +34,7 @@ prior_max = np.array([0.5, 30, 100, -1 , 100, 0   , 0   , 30, -1 , 30])
 prior_unif = Uniform(lower=prior_min, upper=prior_max)
 
 # Load the data
-# data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
+# data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
 # protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
 # ramp_amp = 3.1 # steps of 0.05 -0.15
 # v_shift = -16  # shift for accounting for the liquid junction potential
@@ -49,8 +49,8 @@ prior_unif = Uniform(lower=prior_min, upper=prior_max)
 #                                              return_discontinuities=False)
 #
 
-data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
-# data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_11d.dat'  # second best cell
+data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
+# data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_11d.dat'  # second best cell
 
 i_inj, v, t, t_on, t_off, dt = load_current(data_dir, protocol='rampIV', ramp_amp=3.1)
 

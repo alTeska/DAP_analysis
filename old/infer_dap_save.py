@@ -34,7 +34,7 @@ prior_unif = Uniform(lower=prior_min, upper=prior_max)
 # prior_gauss = prior(prior_max)
 
 # Load the data
-data_dir = '/home/ateska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
+data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
 protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
 ramp_amp = 3.1 # steps of 0.05 -0.15
 v_shift = -16  # shift for accounting for the liquid junction potential

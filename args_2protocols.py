@@ -8,8 +8,7 @@ from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
 
-from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
-                       load_current, load_prior_ranges)
+from dap.utils import (obs_params, syn_obs_data, load_current, load_prior_ranges)
 from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
