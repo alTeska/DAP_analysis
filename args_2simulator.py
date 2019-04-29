@@ -20,7 +20,7 @@ from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", default='_2protocol', help="file name")
+parser.add_argument("-n", "--name", default='_2sim', help="file name")
 parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
 parser.add_argument("-nr", "--n_rounds", default=1, type=int,
