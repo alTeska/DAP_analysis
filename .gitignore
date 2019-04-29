@@ -3,6 +3,7 @@ plots/
 other/
 scripts/
 param_analysis/*.csv
+param_analysis/ramp_current
 __pycache__/
 .ipynb_checkpoints/
 .ropeproject/
