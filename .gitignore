@@ -2,7 +2,9 @@ pickle/
 plots/
 other/
 scripts/
+param_analysis/*.csv
 __pycache__/
 .ipynb_checkpoints/
 .ropeproject/
 .magicindex.json
+old/
