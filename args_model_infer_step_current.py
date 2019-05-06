@@ -88,7 +88,6 @@ M = DAPSimulator(x_o['I'], x_o['dt'], -75)
 s = DAPSummaryStatsStepMoments(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
-S=[S,S]
 
 # Runing the simulation
 inf_snpe = SNPE(generator=G, n_components=n_components, n_hiddens=n_hiddens, obs=S,
@@ -99,8 +98,8 @@ logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
 
 
 # Analyse results
-samples_prior = prior_unif.gen(n_samples=int(10e5))
-samples_posterior = posteriors[-1].gen(n_samples=int(10e5))
+samples_prior = prior_unif.gen(n_samples=int(1e5))
+samples_posterior = posteriors[-1].gen(n_samples=int(1e5))
 
 print('posterior:', posteriors[-1].mean)
 

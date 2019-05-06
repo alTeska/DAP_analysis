@@ -99,8 +99,8 @@ logs, tds, posteriors = inf_snpe.run(n_train=[n_samples], n_rounds=n_rounds,
 
 
 # Analyse results
-samples_prior = prior_unif.gen(n_samples=int(5e5))
-samples_posterior = posteriors[-1].gen(n_samples=int(5e5))
+samples_prior = prior_unif.gen(n_samples=int(1e5))
+samples_posterior = posteriors[-1].gen(n_samples=int(1e5))
 
 print('posterior:', posteriors[-1].mean)
 
