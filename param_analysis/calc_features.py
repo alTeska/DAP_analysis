@@ -2,10 +2,11 @@ import glob
 import shutil
 import pandas as pd
 
-from dap import DAPcython
-from dap.utils import obs_params, load_current
 from tqdm import tqdm
 from scipy.spatial import distance
+from dap import DAPcython
+from dap.utils import obs_params, load_current
+from utils import calc_features_ramp, calc_features_step, find_spikes
 
 
 dt = 1e-2
@@ -18,33 +19,20 @@ dir = glob.glob(directory + '*')
 
 fname_start = dir[0].find('dap_')
 fname_stop = dir[0].find('n_')
-fname = dir[0][fname_start:fname_stop] + '.csv'
+fname = dir[0][fname_start:fname_stop]
 
-df_param = pd.read_csv(fname)
-
+df_param = pd.read_csv(fname + '.csv')
+df_param.set_index('Unnamed: 0', inplace=True)
 
 # calculate DAP
 # load the input data
 Ir, vr, tr, t_onr, t_offr, dtr = load_current(data_dir, protocol='rampIV', ramp_amp=3.1)
 Is, vs, ts, t_ons, t_offs, dts = load_current(data_dir, protocol='IV', ramp_amp=1)
 
-# define a model
-dap = DAPcython(-75, params)
+# get traces for both currents
+U_steps, U_ramps = [], []
 
-# run models on original parameters
-U_step = dap.simulate(dts, ts, Is)
-U_ramp = dap.simulate(dtr, tr, Ir)
-
-# calculate the similarities
-d_step = distance.euclidean(vs, U_step)
-d_ramp = distance.euclidean(vr, U_ramp)
-
-# run for all cells and save into the the DF
-df_paramT = df_param.transpose()
-df_paramT.head()
-df_paramT.drop('Unnamed: 0', inplace=True)
-
-for i, j in tqdm(df_paramT.iterrows()):
+for i, j in tqdm(df_param.iterrows()):
     # get parameters
     par_temp = j.values
 
@@ -56,22 +44,50 @@ for i, j in tqdm(df_paramT.iterrows()):
     U_ramp_x = dap.simulate(dtr, tr, Ir)
 
     # run model
-    U_steps.append(pd.Series(dap.simulate(dts, ts, Is).transpose()[0]))
-    U_ramps.append(dap.simulate(dtr, tr, Ir).transpose()[0])
+    U_steps.append(U_step_x.transpose()[0])
+    U_ramps.append(U_ramp_x.transpose()[0])
 
     # calculate distance for both currents
     dis_step = distance.euclidean(vs, U_step_x)
     dis_ramp = distance.euclidean(vr, U_ramp_x)
 
     # save into new columns
-    df_paramT.loc[i, 'distance_ramp'] = dis_ramp
-    df_paramT.loc[i, 'distance_step'] = dis_step
-    df_paramT.loc[i, 'distance_sum'] = dis_ramp + dis_step
+    df_param.loc[i, 'distance_ramp'] = dis_ramp
+    df_param.loc[i, 'distance_step'] = dis_step
+    df_param.loc[i, 'distance_sum'] = dis_ramp + dis_step
+
+# create DataFrames for traces
+df_step = pd.DataFrame({'step_traces': U_steps})
+df_step.set_index(df_param.index.values, inplace=True)
+
+df_ramp = pd.DataFrame({'ramp_traces': U_ramps})
+df_ramp.set_index(df_param.index.values, inplace=True)
+df_traces_temp = pd.merge(df_param, df_step, how='left', left_index=True, right_index=True)
+df_traces = pd.merge(df_traces_temp, df_ramp, how='left', left_index=True, right_index=True)
+
+# Calculate Statistics for Ramp and Step currents
+step_features_labels = ['rest_pot', 'rest_pot_std','firing_rate', 'ISI_mean', 'ISI_std', 'spike_count', 'spike_times_stim']
+ramp_features_labels = ['rest_pot', 'AP_amp', 'AP_width', 'fAHP', 'DAP_amp', 'DAP_width', 'DAP_deflection','DAP_time', 'mAHP']
+
+stats_step = []
+for i,u in enumerate(U_steps):
+    stats = calc_features_step(u, ts, dts, t_ons, t_offs)
+    stats_step.append(stats)
+
+stats_ramp = []
+for i,u in enumerate(U_ramps):
+    stats = calc_features_ramp(u, tr, dtr, t_onr, t_offr)
+    stats_ramp.append(stats)
+
+# change into data frame
+df_ramps = pd.DataFrame(data=stats_ramp, columns=ramp_features_labels, index=df_param.index)
+df_steps = pd.DataFrame(data=stats_step, columns=step_features_labels, index=df_param.index)
 
 
-
-# save the new data DataFrame
-df_paramT.to_csv(fname[:-4] + '_similarity.csv')
+# save to HDF file
+df_steps.to_hdf(fname + '.hdf', key='step_features')
+df_ramps.to_hdf(fname + '.hdf', key='ramp_features')
+df_traces.to_hdf(fname + '.hdf', key='param_traces')
 
 # remove the temp directory
-# shutil.rmtree(directory)
+shutil.rmtree(directory)

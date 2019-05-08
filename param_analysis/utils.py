@@ -29,6 +29,7 @@ def calc_features_step(U, t, dt, t_on, t_off):
     rest_pot = np.mean(v[t<t_on])
     rest_pot_std = np.std(v[int(.9*t_on/dt):int(t_on/dt)])
 
+    # spike times and inter-spike-intervals
     ind = find_spikes(v)
 
     spike_times = np.array(t)[ind]
@@ -37,26 +38,29 @@ def calc_features_step(U, t, dt, t_on, t_off):
     ind_stim = ind_stim1.astype(int)
 
     firing_rate = 1e3*np.absolute(spike_times_stim.shape[0]/(t_off-t_on))
-    time_1st_spike = spike_times_stim[spike_times_stim>t_on][0]
 
-    ISI = np.diff(spike_times_stim).astype(float)
+    if spike_times_stim.size > 0:
+        time_1st_spike = spike_times_stim[spike_times_stim>t_on][0]
+        ISI = np.diff(spike_times_stim).astype(float)
+    else:
+        time_1st_spike = []
+        ISI = np.diff(spike_times_stim).astype(float)
 
 
     sum_stats_vec = np.array([
                 rest_pot,
                 rest_pot_std,
-                len(spike_times_stim),
-                spike_times_stim,
                 firing_rate,
                 ISI.mean(),
-                ISI.std()
+                ISI.std(),
+                spike_times_stim.size,
+                spike_times_stim,
                 ])
-
 
     return sum_stats_vec
 
 
-def calc_ramp_sum_stats(v, t, dt, t_on, t_off):
+def calc_features_ramp(v, t, dt, t_on, t_off):
     """Calculate summary statistics of a single run with ramp current(single spike with DAP)"""
     stats = []
     stats_idx = []
