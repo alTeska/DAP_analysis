@@ -6,7 +6,10 @@ from tqdm import tqdm
 from scipy.spatial import distance
 from dap import DAPcython
 from dap.utils import obs_params, load_current
-from utils import calc_features_ramp, calc_features_step, find_spikes
+from utils import calc_features_ramp, calc_features_step
+
+import warnings
+warnings.filterwarnings("ignore")
 
 
 dt = 1e-2
