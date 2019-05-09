@@ -10,7 +10,6 @@ def task_copy_rename():
         pass
     return {
         'actions': [(copy_rename, [], {
-            # 'dir': 'step_current'})
             'dir': directory})
         ],
         'verbosity': 2,
