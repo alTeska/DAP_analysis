@@ -1,7 +1,7 @@
 import os
 
 
-directory = 'step_current'
+directory = 'ramp_current'
 
 
 def task_copy_rename():
