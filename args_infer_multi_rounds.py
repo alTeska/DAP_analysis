@@ -1,31 +1,51 @@
-import os
-import numpy as np
+import argparse, os
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
-
 from utils_analysis import logs_to_plot
+
 from delfi.distribution import Uniform
 from delfi.generator import Default
 from delfi.inference import SNPE  # , Basic, CDELFI
-from dap import DAPcython
+
 from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
                        load_current, load_prior_ranges)
 from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
 from dap.dap_simulator import DAPSimulator
+from dap import DAPcython
 
 
-# pick params => this goes into args
-name = '_test_save_each'
+# General Settings Pick
+parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--name", default='_save_each', help="file name")
+parser.add_argument("-ns", "--n_samples", default=10, type=int,
+                    help="number of samples per round")
+parser.add_argument("-nr", "--n_rounds", default=1, type=int,
+                    help="number of rounds")
+parser.add_argument("-np", "--n_params", default=2, type=int,
+                    help="number of parameters")
+parser.add_argument('-nh', '--hiddens', action='store', type=int, nargs='*',
+                    default=[15])
 
-n_rounds = 20
+args = parser.parse_args()
+
+
+name = args.name
+directory = 'results/dap_model' + name
+
+if not os.path.exists(directory):
+    print('creating directory')
+    os.makedirs (directory)
+
+n_hiddens = args.hiddens
+n_samples = args.n_samples
+n_rounds = args.n_rounds
+n_params = args.n_params
+
 round_cl = n_rounds
 
-n_samples = 1000
 prior_mixin = 80
 epochs = 1000
-
-n_hiddens = [30]
-n_params = 5
 
 n_summary = 17
 n_components = 1
@@ -114,7 +134,7 @@ hyper = {
 
 hyperparams = pd.DataFrame(hyper, index=[0])
 hyperparams
-# hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')
+hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')
 
 # Save All of the Plots
 for i, posterior in enumerate(posteriors):
