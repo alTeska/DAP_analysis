@@ -1,5 +1,6 @@
 pickle/
 plots/
+results/
 other/
 scripts/
 param_analysis/*.csv
