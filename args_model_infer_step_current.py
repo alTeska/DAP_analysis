@@ -195,6 +195,13 @@ hyperparams = pd.DataFrame(hyper, index=[0])
 hyperparams.to_csv(path_or_buf=direct_out + '/hyperparam.csv')
 
 # Save parameters
-parameters = pd.DataFrame(data=posteriors[-1].mean, index=labels,
-                          columns=['mean param'])
-parameters.to_csv(path_or_buf=direct_out + '/parameters.csv')
+posteriors_means, posteriors_std = [], []
+for i, posterior in enumerate(posteriors):
+    posteriors_means.append(posterior.mean)
+    posteriors_std.append(posterior.std)
+
+posteriors_means = pd.DataFrame(data=posteriors_means, columns=labels)
+posteriors_std = pd.DataFrame(data=posteriors_std, columns=labels)
+
+posteriors_means.to_csv(path_or_buf=direct_out + '/parameters_mean.csv')
+posteriors_std.to_csv(path_or_buf=direct_out + '/parameters_std.csv')
