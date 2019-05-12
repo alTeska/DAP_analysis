@@ -17,10 +17,10 @@ from dap.dap_simulator import DAPSimulator
 # pick params => this goes into args
 name = '_test_save_each'
 
-n_rounds = 20
+n_rounds = 1
 round_cl = n_rounds
 
-n_samples = 1000
+n_samples = 10
 prior_mixin = 80
 epochs = 1000
 
@@ -184,7 +184,7 @@ for i, posterior in enumerate(posteriors):
     g_h1b = logs_to_plot(logs, 'h1.mb', melted=True)
 
     # Saving plots
-    print('Saving Plots')
+    print('Saving Plots: {}'.format(i))
 
     loss.savefig(dir_out + '/loss.png', bbox_inches='tight')
     distr_comb.savefig(dir_out + '/distr_comb.png', bbox_inches='tight')

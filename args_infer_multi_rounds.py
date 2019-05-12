@@ -1,4 +1,4 @@
-import argparse, os
+import argparse, os, gc
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,6 +52,14 @@ n_components = 1
 reg_lambda = 0.01
 
 directory = 'results/dap_model' + name
+
+for i in range(0, n_rounds):
+    dir_out = directory + '/1x' + str(i+1)
+
+    if not os.path.exists(dir_out):
+        print('creating directory')
+        os.makedirs(dir_out)
+
 
 # picking experiments observables
 observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
@@ -140,10 +148,10 @@ hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')
 for i, posterior in enumerate(posteriors):
     dir_out = directory + '/1x' + str(i+1)
 
-    if not os.path.exists(dir_out):
-        print('creating directory')
-        os.makedirs(dir_out)
-
+    # if not os.path.exists(dir_out):
+    #     print('creating directory')
+    #     os.makedirs(dir_out)
+    #
     # Analyse results
     samples_posterior = posterior.gen(n_samples=int(5e5))
     x_post = syn_obs_data(I, dt, posterior.mean)
@@ -224,3 +232,5 @@ for i, posterior in enumerate(posteriors):
     loss.clf()
     distr_comb.clf()
     simulation.clf()
+
+    gc.collect()
