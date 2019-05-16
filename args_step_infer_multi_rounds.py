@@ -17,7 +17,7 @@ from dap import DAPcython
 
 # General Settings Pick
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--name", default='_save_each', help="file name")
+parser.add_argument("-n", "--name", default='__step_save_each', help="file name")
 parser.add_argument("-ns", "--n_samples", default=10, type=int,
                     help="number of samples per round")
 parser.add_argument("-nr", "--n_rounds", default=1, type=int,
@@ -69,19 +69,16 @@ observables = {'loss.lprobs', 'imputation_values', 'h1.mW', 'h1.mb', 'h2.mW',
 
 # Load the current
 data_dir = '/home/alteska/Desktop/LFI_DAP/data/rawData/2015_08_26b.dat'    # best cell
-protocol = 'rampIV' # 'IV' # 'rampIV' # 'Zap20'
-ramp_amp = 3.1
+protocol = 'IV' # 'IV' # 'rampIV' # 'Zap20'
+ramp_amp = 1
 I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ramp_amp)
-I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, protocol='IV', ramp_amp=1)
-Istep = I_step[2500:18700]
-vstep = v_step[2500:18700]
+I_ramp, v_ramp, t_ramp, t_on_ramp, t_off_ramp, dt_ramp = load_current(data_dir, protocol='rampIV', ramp_amp=3.1)
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)
+U_ramp = dap.simulate(dt_ramp, t_ramp, I_ramp)
 U = dap.simulate(dt, t, I)
-U_step = dap.simulate(dt_step, t_step, Istep)
-
 
 # generate data format for SNPE / OBSERVABLE
 x_o = {'data': v.reshape(-1),
@@ -157,8 +154,8 @@ for i, posterior in enumerate(posteriors):
     #
     # Analyse results
     samples_posterior = posterior.gen(n_samples=int(5e5))
-    x_post = syn_obs_data(I, dt, posteriors[-1].mean)
-    x_post_step = syn_obs_data(I_step, dt, posteriors[-1].mean)
+    x_post = syn_obs_data(I, dt, posterior.mean)
+    x_post_ramp = syn_obs_data(I_ramp, dt_ramp, posterior.mean)
 
     idx = np.arange(0, len(x_o['data']))
 
@@ -169,18 +166,17 @@ for i, posterior in enumerate(posteriors):
     axes[0].set_title('current')
     axes[0].legend()
 
-    axes[1].plot(idx, x_o['data'], c='g', label='goal')
-    axes[1].plot(idx, x_post['data'], c='b', label='posterior')
+    axes[1].step(idx, x_o['data'], c='g', label='goal')
+    axes[1].step(idx, x_post['data'], c='b', label='posterior')
     axes[1].plot(idx, U, c='pink', label='best fit')
     axes[1].set_title('Voltage trace')
     axes[1].legend()
 
-    axes[2].plot(t_step, v_step, c='g', label='goal')
-    axes[2].plot(t_step, x_post_step['data'], c='b', label='posterior')
-    axes[2].plot(t_step, U_step, c='pink', label='best fit')
-    axes[2].set_title('Voltage trace step current')
+    axes[2].plot(t_ramp, v_ramp, c='g', label='goal')
+    axes[2].plot(t_ramp, x_post_ramp['data'], c='b', label='posterior')
+    axes[2].plot(t_ramp, U_ramp, c='pink', label='best fit')
+    axes[2].set_title('Voltage trace ramp current')
     axes[2].legend()
-
 
 
     distr_comb, axes = plt.subplots(nrows=n_params, figsize=(16,14))
