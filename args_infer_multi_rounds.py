@@ -10,7 +10,7 @@ from delfi.inference import SNPE  # , Basic, CDELFI
 
 from dap.utils import (obs_params, syn_obs_stats, syn_obs_data,
                        load_current, load_prior_ranges)
-from dap.dap_sumstats_step_mom import DAPSummaryStatsStepMoments
+from dap.dap_sumstats_moments import DAPSummaryStatsMoments
 from dap.dap_simulator import DAPSimulator
 from dap import DAPcython
 
@@ -98,11 +98,11 @@ idx = np.arange(0, len(x_o['data']))
 
 # Summary Statistics
 S = syn_obs_stats(x_o['I'], params=params, dt=x_o['dt'], t_on=t_on, t_off=t_off,
-                  n_summary=n_summary, summary_stats=1, data=x_o)
+                  n_summary=n_summary, summary_stats=0, data=x_o)
 
 M = DAPSimulator(x_o['I'], x_o['dt'], -75)
 
-s = DAPSummaryStatsStepMoments(t_on, t_off, n_summary=n_summary)
+s = DAPSummaryStatsMoments(t_on, t_off, n_summary=n_summary)
 G = Default(model=M, prior=prior_unif, summary=s)  # Generator
 
 # Runing the simulation
