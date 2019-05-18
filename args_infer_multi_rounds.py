@@ -45,7 +45,7 @@ n_params = args.n_params
 round_cl = n_rounds
 
 prior_mixin = 80
-epochs = 1000
+epochs = 100
 
 n_summary = 17
 n_components = 1
