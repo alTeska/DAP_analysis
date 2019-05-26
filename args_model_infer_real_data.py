@@ -64,6 +64,12 @@ I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, 
 Istep = I_step[2500:18700]
 vstep = v_step[2500:18700]
 
+inpu, axes = plt.subplots(3, 1, figsize=(16,14))
+axes[0].plot(I_step, label='I_step')
+axes[1].plot(Istep, label='Istep')
+plt.show()
+# inpu.savefig(dir_out + '/second_input.png', bbox_inches='tight')
+
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)

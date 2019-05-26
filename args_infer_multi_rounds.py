@@ -75,12 +75,21 @@ I, v, t, t_on, t_off, dt = load_current(data_dir, protocol=protocol, ramp_amp=ra
 I_step, v_step, t_step, t_on_step, t_off_step, dt_step = load_current(data_dir, protocol='IV', ramp_amp=1)
 Istep = I_step[2500:18700]
 vstep = v_step[2500:18700]
+tstep = t_step[0:16200]
+
+inpu, axes = plt.subplots(3, 1, figsize=(16,14))
+axes[0].plot(I_step, label='I_step')
+axes[1].plot(Istep, label='Istep')
+plt.show()
+
+# inpu.savefig(dir_out + '/second_input.png', bbox_inches='tight')
+
 
 # Set up themodel
 params, labels = obs_params(reduced_model=True)
 dap = DAPcython(-75, params)
 U = dap.simulate(dt, t, I)
-U_step = dap.simulate(dt_step, t_step, Istep)
+U_step = dap.simulate(dt_step, tstep, Istep)
 
 
 # generate data format for SNPE / OBSERVABLE
@@ -151,14 +160,10 @@ hyperparams.to_csv(path_or_buf=directory + '/hyperparam.csv')
 for i, posterior in enumerate(posteriors):
     dir_out = directory + '/1x' + str(i+1)
 
-    # if not os.path.exists(dir_out):
-    #     print('creating directory')
-    #     os.makedirs(dir_out)
-    #
     # Analyse results
     samples_posterior = posterior.gen(n_samples=int(5e5))
     x_post = syn_obs_data(I, dt, posteriors[-1].mean)
-    x_post_step = syn_obs_data(I_step, dt, posteriors[-1].mean)
+    x_post_step = syn_obs_data(Istep, dt, posteriors[-1].mean)
 
     idx = np.arange(0, len(x_o['data']))
 
@@ -175,9 +180,9 @@ for i, posterior in enumerate(posteriors):
     axes[1].set_title('Voltage trace')
     axes[1].legend()
 
-    axes[2].plot(t_step, v_step, c='g', label='goal')
-    axes[2].plot(t_step, x_post_step['data'], c='b', label='posterior')
-    axes[2].plot(t_step, U_step, c='pink', label='best fit')
+    axes[2].plot(tstep, vstep, c='g', label='goal')
+    axes[2].plot(tstep, x_post_step['data'], c='b', label='posterior')
+    axes[2].plot(tstep, U_step, c='pink', label='best fit')
     axes[2].set_title('Voltage trace step current')
     axes[2].legend()
 
